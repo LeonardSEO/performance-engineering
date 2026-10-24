@@ -1,0 +1,5 @@
+{
+ "loading":{"metric":"primaryMs","maximum":450},
+ "assets":{"metric":"imageBytes","maximum":100000},
+ "interaction":{"metric":"acknowledgmentProxyMs","maximum":100}
+}

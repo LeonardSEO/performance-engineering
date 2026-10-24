@@ -1,10 +1,17 @@
 {
   "name": "performance-engineering",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "displayName": "Performance Engineering",
   "shortDescription": "Evidence-led performance",
   "description": "Nine focused skills and advisory hooks for evidence-led web, fullstack, React and React Native performance engineering.",
-  "author": { "name": "LeonardSEO" },
+  "author": {
+    "name": "Leonard van Hemert"
+  },
   "repository": "https://github.com/LeonardSEO/performance-engineering",
-  "license": "MIT"
+  "license": "MIT",
+  "publisher": {
+    "name": "Leonard van Hemert",
+    "countries": [],
+    "commerce": false
+  }
 }

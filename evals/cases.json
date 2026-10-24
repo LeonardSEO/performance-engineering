@@ -7,8 +7,15 @@
       "index.html": "<html><head><script src='/vendor-editor-4mb.js'></script><link rel='stylesheet' href='/all-pages.css'></head><body><header>Dashboard</header><img src='/hero-5000px.jpg' loading='lazy'><main id='content'></main><script src='/app.js'></script></body></html>",
       "app.js": "document.querySelector('#content').textContent = ''; Promise.all([fetch('/primary'),fetch('/optional-reports')]).then(async ([a,b]) => { document.body.innerHTML = await a.text() + await b.text(); });"
     },
-    "domains": ["asset-performance", "progressive-page-rendering"],
-    "review_checks": ["LCP/lazy and critical asset hypothesis", "Useful shell/primary content not gated by optional work", "Comparable measurement rather than fabricated gains"]
+    "domains": [
+      "asset-performance",
+      "progressive-page-rendering"
+    ],
+    "review_checks": [
+      "LCP/lazy and critical asset hypothesis",
+      "Useful shell/primary content not gated by optional work",
+      "Comparable measurement rather than fabricated gains"
+    ]
   },
   {
     "id": "data-backend",
@@ -18,8 +25,15 @@
       "server/api.js": "const cache = new Map(); export async function dashboard(req, db) { const tenant = await authorize(req); if(cache.has('dashboard')) return cache.get('dashboard'); const rows = await db.orders.findMany({where:{tenantId:tenant.id}}); for(const row of rows) row.owner = await db.users.findUnique({where:{id:row.ownerId}}); const value={rows}; cache.set('dashboard',value);return value; }",
       "src/data.js": "export async function load() { const scope=await getAssignedTenant(); const a=await getPrimary(scope);const b=await getOptional(scope);return {a,b}; }"
     },
-    "domains": ["backend-performance", "data-performance"],
-    "review_checks": ["Tenant-specific cache key and freshness", "Scoped batching/N+1 diagnosis", "Authorization remains before dependent reads; independent reads may overlap"]
+    "domains": [
+      "backend-performance",
+      "data-performance"
+    ],
+    "review_checks": [
+      "Tenant-specific cache key and freshness",
+      "Scoped batching/N+1 diagnosis",
+      "Authorization remains before dependent reads; independent reads may overlap"
+    ]
   },
   {
     "id": "optimistic-writes",
@@ -28,8 +42,15 @@
       "package.json": "{\"dependencies\":{}}",
       "src/toggle.js": "let saved=false; export async function toggle(){const before=saved;saved=!saved;render(saved);try{await fetch('/preference',{method:'POST',body:JSON.stringify({value:saved})});setTimeout(()=>showSaved(),200);}catch{saved=before;render(saved);}}"
     },
-    "domains": ["doherty-threshold", "data-performance"],
-    "review_checks": ["Older rollback does not erase newer intent", "Server writes serialized or versioned", "Honest pending/error handling, no artificial result delay"]
+    "domains": [
+      "doherty-threshold",
+      "data-performance"
+    ],
+    "review_checks": [
+      "Older rollback does not erase newer intent",
+      "Server writes serialized or versioned",
+      "Honest pending/error handling, no artificial result delay"
+    ]
   },
   {
     "id": "react-next",
@@ -38,8 +59,15 @@
       "package.json": "{\"dependencies\":{\"next\":\"15.5.0\",\"react\":\"19.1.0\",\"react-dom\":\"19.1.0\"}}",
       "app/page.tsx": "let currentUser; export default async function Page(){currentUser=await auth();const primary=await getPrimary(currentUser.id);const optional=await getOptional(currentUser.id);return <><Header/><Dashboard primary={primary} optional={optional}/></>;} function Header(){return <header>{currentUser.name}</header>}"
     },
-    "domains": ["react-performance", "data-performance"],
-    "review_checks": ["Module mutable currentUser is unsafe across server requests", "Version-aware scoped concurrency and streaming", "No blanket memoization/cache default assumption"]
+    "domains": [
+      "react-performance",
+      "data-performance"
+    ],
+    "review_checks": [
+      "Module mutable currentUser is unsafe across server requests",
+      "Version-aware scoped concurrency and streaming",
+      "No blanket memoization/cache default assumption"
+    ]
   },
   {
     "id": "react-native",
@@ -48,14 +76,86 @@
       "package.json": "{\"dependencies\":{\"react-native\":\"0.81.0\",\"react\":\"19.1.0\",\"@shopify/flash-list\":\"2.0.0\"}}",
       "Screen.tsx": "import {ScrollView,Text} from 'react-native'; export function Screen({rows}) { React.useEffect(()=>performance.mark('interactive'),[]);const values=rows.map(row=>expensiveCompute(row));return <ScrollView>{values.map((v,i)=><Text key={i}>{v.label}</Text>)}</ScrollView>; }"
     },
-    "domains": ["react-native-performance"],
-    "review_checks": ["Separate JS/UI frame work and meaningful startup milestone", "Release-device evidence before claims", "Native list/version correctness; no DOM or blanket compiler fix"]
+    "domains": [
+      "react-native-performance"
+    ],
+    "review_checks": [
+      "Separate JS/UI frame work and meaningful startup milestone",
+      "Release-device evidence before claims",
+      "Native list/version correctness; no DOM or blanket compiler fix"
+    ]
   },
   {
     "id": "unrelated-docs",
     "prompt": "Correct the spelling mistake in this README sentence and output only the corrected sentence: This project has a proffesional README. Do not review code, performance, or tooling.",
-    "files": {"package.json": "{}", "README.md": "This project has a proffesional README."},
+    "files": {
+      "package.json": "{}",
+      "README.md": "This project has a proffesional README."
+    },
     "domains": [],
-    "review_checks": ["Only the corrected sentence", "No performance routing, audit or unrelated recommendations"]
+    "review_checks": [
+      "Only the corrected sentence",
+      "No performance routing, audit or unrelated recommendations"
+    ]
+  },
+  {
+    "id": "asset-recipes",
+    "prompt": "Implement a source-only performance review for lazy loading and HTTP caching. Distinguish visible hero from offscreen images, optional editor loading and personalized ETag revalidation. Give scoped candidates and evidence limits.",
+    "domains": [
+      "asset-performance",
+      "data-performance"
+    ],
+    "files": {
+      "index.html": "<script src=\"editor-4mb.js\"></script><img src=\"hero-5000px.jpg\" loading=\"lazy\"><img src=\"detail.jpg\">",
+      "response.txt": "GET /account: Cache-Control: public, max-age=3600; ETag: \"global-1\"; body varies with authenticated account.",
+      "package.json": "{}"
+    },
+    "review": [
+      "No inferred dimensions/bytes from filenames",
+      "Do not lazy-load critical hero",
+      "Authorize before scoped ETag validation",
+      "Optional module failure/retry and conditional benefits"
+    ]
+  },
+  {
+    "id": "multi-writer-recovery",
+    "prompt": "Review performance and correctness of this optimistic preference flow. Two tabs and a restarted client can write concurrently. A response can be lost after the server commits. Explain a safe recovery protocol and what requires server changes. State the actual HTTP method.",
+    "domains": [
+      "doherty-threshold",
+      "data-performance"
+    ],
+    "files": {
+      "client.js": "let seq=0; async function save(value){render(value);return fetch('/preference',{method:'POST',body:JSON.stringify({value,seq:++seq})})}",
+      "server.js": "const lastSeq=new Map(); function update(user,entity,{value,seq}){if(seq<=(lastSeq.get(user)||0))return {status:409}; lastSeq.set(user,seq); store(user,entity,value); return {status:200};}",
+      "package.json": "{}"
+    },
+    "review": [
+      "Existing method POST",
+      "Local sequence insufficient across restarts/tabs/entities",
+      "Atomic server revision check",
+      "Durable scoped idempotency receipt for lost-response retry",
+      "Do not blindly overwrite another actor using newly fetched version",
+      "Keep uncertain pending state and newer drafts"
+    ]
+  },
+  {
+    "id": "history-restoration",
+    "prompt": "Review slow back/forward navigation and bfcache restoration of this sensitive account page. Another tab can log out or switch accounts while it is frozen. Preserve privacy and describe real-browser verification; no runtime trace is available.",
+    "domains": [
+      "progressive-page-rendering",
+      "data-performance"
+    ],
+    "files": {
+      "account.js": "mount(()=>fetch('/account').then(r=>r.json()).then(showPrivate)); addEventListener('pageshow',()=>fetch('/account').then(r=>r.json()).then(showPrivate));",
+      "headers.txt": "Cache-Control: private, no-store",
+      "package.json": "{}"
+    },
+    "review": [
+      "bfcache differs from HTTP cache",
+      "Do not remove no-store purely for speed",
+      "Async pageshow fetch alone insufficient for stale private frames",
+      "Mask/disable private content around lifecycle and validate scope",
+      "Actual persisted event versus handler simulation"
+    ]
   }
 ]

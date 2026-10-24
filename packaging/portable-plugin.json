@@ -1,10 +1,10 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "performance-engineering",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Nine focused skills and advisory hooks for evidence-led web, fullstack, React and React Native performance engineering.",
   "author": {
-    "name": "LeonardSEO"
+    "name": "Leonard van Hemert"
   },
   "repository": "https://github.com/LeonardSEO/performance-engineering",
   "homepage": "https://github.com/LeonardSEO/performance-engineering",
@@ -15,12 +15,26 @@
         "displayName": "Performance Engineering",
         "shortDescription": "Evidence-led performance",
         "longDescription": "Nine focused skills and advisory hooks for evidence-led web, fullstack, React and React Native performance engineering.",
-        "developerName": "LeonardSEO",
+        "developerName": "Leonard van Hemert",
         "category": "Developer Tools",
+        "logo": "./assets/logo.png",
+        "composerIcon": "./assets/logo.png",
+        "websiteURL": "https://github.com/LeonardSEO/performance-engineering",
+        "supportURL": "https://github.com/LeonardSEO/performance-engineering/issues",
+        "privacyPolicyURL": "https://github.com/LeonardSEO/performance-engineering/blob/main/docs/hooks.md",
+        "termsOfServiceURL": "https://github.com/LeonardSEO/performance-engineering/blob/main/LICENSE",
         "capabilities": [],
         "defaultPrompt": "Diagnose the bottleneck, select relevant skills, preserve correctness, and compare equivalent measurements."
       },
-      "hooks": "./hooks/codex.json"
+      "hooks": "./hooks/codex.json",
+      "review": {
+        "commerce": false,
+        "commerce_description": "This plugin is completely free and does not sell products or process payments."
+      },
+      "publication": {
+        "release_notes": "Improved bilingual routing, loading/cache/scheduling/history recipes, executable labs and mutation recovery tests.",
+        "countries": []
+      }
     }
   }
 }

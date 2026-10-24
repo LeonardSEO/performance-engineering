@@ -26,3 +26,5 @@ Honor reduced motion in CSS and JS; keep static state/status feedback. Interrupt
 ## Verify
 
 Exercise keyboard/focus, reduced motion, cancellation, rapid reversals and supported feature fallbacks. Inspect dropped frames, paint regions, layout, memory and CPU under representative conditions. A 60 Hz frame is about 16.7 ms and a 120 Hz frame about 8.3 ms, shared by all rendering work; neither is wholly a JavaScript allowance. Follow [Measurement](../performance-engineering/references/measurement.md).
+
+For cooperative browser work, read [Task scheduling](references/task-scheduling.md), including `scheduler.yield()` and a task-based fallback.

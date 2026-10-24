@@ -24,3 +24,5 @@ Use [Resource delivery](references/resource-delivery.md) for images, fonts, bund
 ## Verify
 
 Repeat equivalent cold and warm navigations. Check transferred bytes, critical-path timing, LCP, layout shifts, font fallback, cache headers and functional delivery. Keep source estimates separate from actual compressed transfer and main-thread execution cost. Feature-detect speculative navigation; evaluate wasted bytes and side effects before enabling prerendering.
+
+Read [Loading recipes](references/loading-recipes.md) for hero/offscreen images, optional modules and compression, and [HTTP caching](references/http-caching.md) for validators and scoped revalidation.

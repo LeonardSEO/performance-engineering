@@ -131,3 +131,22 @@ test('state count and TTL are bounded; documented opt-out is silent',t=>{
   const result=spawnSync(process.execPath,[cli,'codex'],{input:JSON.stringify(f.input('SessionStart')),encoding:'utf8',env:{...process.env,PERFORMANCE_ENGINEERING_HOOKS:'off'}});
   assert.equal(result.status,0);assert.equal(result.stdout,'');
 });
+
+test('routing corpus activates intended guidance and stays silent for unrelated work',()=>{
+ const cases=JSON.parse(fs.readFileSync(new URL('../evals/routing.json',import.meta.url)));
+ for(const c of cases){
+  const actual=routePrompt(c.prompt);
+  if(c.silent)assert.deepEqual(actual,[],c.prompt);
+  for(const expected of c.includes??[])assert.ok(actual.includes(expected),`${c.prompt}: ${expected} missing from ${actual}`);
+  for(const forbidden of c.excludes??[])assert.ok(!actual.includes(forbidden),c.prompt);
+  assert.ok(actual.length<=2);
+ }
+});
+test('affected markup uses asset/readiness evidence without auditing plain text edits',t=>{
+ const f=fixture(t);
+ const image=f.write('index.html','<img src="hero.webp" width="800" height="450" loading="lazy">');
+ assert.deepEqual(routeFiles([image],f.cwd),['asset-performance']);
+ const ready=f.write('view.svelte','<section aria-busy="true"><img src="a.webp"></section>');
+ assert.deepEqual(routeFiles([ready],f.cwd),['asset-performance','progressive-page-rendering']);
+ const prose=f.write('about.html','<p>Hello world.</p>');assert.deepEqual(routeFiles([prose],f.cwd),[]);
+});

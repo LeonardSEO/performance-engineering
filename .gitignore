@@ -4,3 +4,6 @@ coverage/
 .test-state/
 validation/private/
 *.tmp
+labs/generated/
+playwright-report/
+test-results/

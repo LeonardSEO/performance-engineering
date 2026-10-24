@@ -21,3 +21,23 @@ jobs:
       - run: npm run generate
       - run: git diff --exit-code
       - run: npm run check
+      - run: npm run build:release -- --out validation/private/dist
+
+  native-loaders:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --prefix validation/private/host-clis @openai/codex@0.163.0 @anthropic-ai/claude-code@2.1.303
+      - run: node scripts/smoke-host-loaders.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: native-loader-${{ matrix.os }}
+          path: validation/private/native-loader-*.json

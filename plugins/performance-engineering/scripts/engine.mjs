@@ -89,31 +89,40 @@ export function extractFiles(input, cwd) {
     .map(n => canonicalPath(path.resolve(cwd, n))).filter(n => within(cwd, n)).slice(0, 24);
 }
 
-const PERF = /\b(?:performance|optimi[sz]\w*|slow\w*|sluggish|latency|bottleneck\w*|waterfall\w*|jank\w*|fps|lcp|inp|cls|ttfb|prefetch\w*|skeleton\w*|optimistic|hydration|profil\w*|cach\w*|traag|trage|vertraging|sneller|snelheid|laden|laadtijd|haper\w*)\b/i;
+const PERF = /\b(?:performance|optimi[sz]\w*|optimalis\w*|slow\w*|sluggish|latency|bottleneck\w*|waterfall\w*|jank\w*|fps|lcp|inp|cls|ttfb|prefetch\w*|skeleton\w*|optimistic|hydration|profil\w*|cach\w*|traag|trage|vertraging|sneller|snelheid|laden|laadtijd|haper\w*|lazy[ -]?(?:load\w*|laden)|responsive images?|afbeeldingscompressie|bfcache|back.?forward cache|etag|cache-control|brotli|srcset|font-display|code[ -]splitting|long tasks?|startup|frame drops?|scheduler\.yield|virtuali[sz]\w*)\b/i;
 const DOC_ONLY = /\b(?:readme|documentation|spelling|typo|punctuation|license|licence|documentatie|spelfout)\b/i;
 
 export function routePrompt(prompt, stack = 'unknown') {
-  if (typeof prompt !== 'string' || prompt.length > MAX_FILE || !PERF.test(prompt)) return [];
+  if (typeof prompt !== 'string' || prompt.length > MAX_FILE) return [];
   // Attached examples or evaluation instructions must not turn a code task
   // into a documentation-only task. The opening request owns that decision.
   const positiveIntent = prompt.split(/\n\s*\n/, 1)[0].replace(/\b(?:do not|don't|never|niet)\b[^.!?\n]*/gi, '');
   if (DOC_ONLY.test(positiveIntent) && !/\b(?:implement|code|fix (?:the )?(?:app|page|api)|application|runtime|profiler|implementeren)\b/i.test(positiveIntent)) return [];
+  if (!PERF.test(positiveIntent)) return [];
   const scores = new Map();
+  // Task prose outranks incidental API names in attached source. Code is only
+  // supporting evidence; it cannot activate an unrelated documentation task.
   const add = (domain, score) => scores.set(domain, (scores.get(domain) ?? 0) + score);
-  if (/react[ -]?native|\bexpo\b|hermes|turbo.?module|native startup|js.?thread|ui.?thread/i.test(prompt)) add('react-native-performance', 100);
-  if (/\b(?:database|sql|n\+1|api|query|queries|endpoint|connection pool|backend|server latency)\b/i.test(prompt)) add('backend-performance', 50);
-  if (/waterfall|prefetch|dedup|out.of.order|stale|verouderd|tenant|cach|request|data load|fetch/i.test(prompt)) add('data-performance', 30);
-  if (/optimistic|optimistisch|toggle|button|click|tap|save|saving|progress|feedback|rollback|opslaan|voortgang|knop/i.test(prompt)) add('doherty-threshold', 45);
-  if (/\blcp\b|image|font|bundle|stylesheet|third.party|compression|resource|afbeelding|<img\b|\.(?:jpe?g|avif|webp|woff2?)\b/i.test(prompt)) add('asset-performance', 40);
-  if (/skeleton|shell|full.page|cold navigation|progressive|loading screen|page chrome|laadscherm/i.test(prompt)) add('progressive-page-rendering', 45);
-  if (/main.thread|layout|paint|animation|motion|scroll|jank|dom\b|long task|rendering/i.test(prompt)) add('rendering-performance', 35);
-  if (/\breact\b|next\.?js|hydration|suspense|server component|re.render|memoization/i.test(prompt) && !scores.has('react-native-performance') && stack !== 'native') add('react-performance', 55);
+  const scoreText = (text, weight) => {
+    const hit = (pattern, domain, score) => { if (pattern.test(text)) add(domain, score * weight); };
+    hit(/react[ -]?native|\bexpo\b|hermes|turbo.?module|native startup|js.?thread|ui.?thread/i, 'react-native-performance', 100);
+    hit(/\b(?:database\w*|sql|n\+1|api|query|queries|endpoint|connection pool|backend|redis|server latency)\b/i, 'backend-performance', 50);
+    hit(/waterfall|prefetch|dedup|out.of.order|stale|verouderd|tenant|cach|request|data load|fetch/i, 'data-performance', 30);
+    hit(/optimistic|optimistisch|toggle|button|click|tap|save|saving|progress|feedback|rollback|opslaan|voortgang|knop/i, 'doherty-threshold', 45);
+    hit(/\blcp\b|image|font|bundle|stylesheet|third.party|compression|resource|afbeelding|foto|<img\b|lazy[ -]?(?:load|laden)|srcset|brotli|\.(?:jpe?g|avif|webp|woff2?)\b/i, 'asset-performance', 40);
+    hit(/http cach|cache-control|etag|if-none-match|last-modified|cdn|immutable/i, 'asset-performance', 60);
+    hit(/skeleton|shell|full.page|cold navigation|progressive|loading screen|page chrome|laadscherm|bfcache|back.?forward cache/i, 'progressive-page-rendering', 45);
+    hit(/main.thread|layout|paint|animation|motion|scroll|jank|dom\b|long task|rendering|scheduler\.yield|virtuali[sz]/i, 'rendering-performance', 35);
+    hit(/\breact\b|next\.?js|hydration|suspense|server component|re.render|memoization/i, 'react-performance', 55);
+  };
+  scoreText(positiveIntent, 4);
+  scoreText(prompt.slice(positiveIntent.length), 1);
   if (stack === 'native') {
     add('react-native-performance', 80);
     scores.delete('rendering-performance'); scores.delete('react-performance'); scores.delete('asset-performance');
   }
   if (scores.has('react-native-performance')) {
-    scores.delete('react-performance'); scores.delete('rendering-performance');
+    scores.delete('react-performance'); scores.delete('rendering-performance'); scores.delete('asset-performance');
   }
   if (!scores.size) add('performance-engineering', 1);
   return [...scores].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).slice(0, 2).map(x => x[0]);
@@ -131,6 +140,12 @@ export function routeFiles(files, cwd) {
     const source = safeRead(cwd, file, 64 * 1024) ?? '';
     const native = stack === 'native' || /(?:from\s*|require\s*\()\s*['"](?:react-native|expo(?:-[^'"]+)?)['"]/.test(source);
     if (native && /\.(?:[cm]?[jt]sx?|swift|kt|java|mm?|cpp)$/.test(rel)) { add('react-native-performance', 80); continue; }
+    // Inspect only the explicitly affected bounded markup file. A prose-only
+    // HTML edit should not start an asset audit merely because of its suffix.
+    if (/\.(?:html?|vue|svelte|astro)$/i.test(rel)) {
+      if (/<(?:img|picture|video|iframe)\b|<(?:script|link)\b[^>]*(?:src=|stylesheet|preload)/i.test(source)) add('asset-performance', 45);
+      if (/aria-busy|data-loading|skeleton|<template\b/i.test(source)) add('progressive-page-rendering', 40);
+    }
     if (/\.(?:sql|prisma)$|(?:^|\/)(?:api|server|backend|db|database|repositories)(?:\/|$)/i.test(rel)) add('backend-performance', 60);
     if (/(?:^|\/)(?:queries|services|cache|data)(?:\/|$)|(?:use.*Query|fetch|query|cache)\.[jt]sx?$/i.test(rel)) add('data-performance', 45);
     if (/\.(?:avif|webp|jpe?g|png|woff2?|svg)$|(?:vite|webpack|rollup)\.config|(?:^|\/)(?:assets|fonts)(?:\/|$)/i.test(rel)) add('asset-performance', 50);

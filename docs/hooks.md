@@ -8,7 +8,7 @@ Codex uses `${PLUGIN_ROOT}` and Claude uses `${CLAUDE_PLUGIN_ROOT}` in its own c
 
 Session startup reads a bounded `package.json` to identify the root platform. When structured file paths are available, the nearest package is authoritative; a root Next.js app does not turn a nested native app into a DOM target. Native imports can also establish native scope. Manifests are parsed as data and no scripts are executed.
 
-Prompt matching is deterministic English/Dutch pattern matching, not a semantic model. It can miss an unusual wording or broad shell rewrite. Skill descriptions and explicit invocation remain available. Documentation-only prompts do not automatically start a performance workflow.
+Prompt matching is deterministic English/Dutch pattern matching, not a semantic model. Task prose outweighs incidental source tokens; lazy-loading, Dutch optimization, HTTP validators and history restoration have explicit signals. Bounded markup inspection can identify affected media/readiness without auditing a plain text-only HTML edit. It can miss an unusual wording or broad shell rewrite. Skill descriptions and explicit invocation remain available. Documentation-only prompts do not automatically start a performance workflow.
 
 For edits/patches, the engine reads explicit supported file fields and patch headers. For shell results it accepts explicit structured changed-file information only. It does not interpret arbitrary shell code as a reliable list of side effects. Relevant third-party MCP tools without an understood path schema are intentionally ignored.
 

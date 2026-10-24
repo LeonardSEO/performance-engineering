@@ -45,3 +45,7 @@ Record unsuccessful attempts briefly where useful, without creating an unsolicit
 Deliver measured findings, supported causes, static hypotheses, changes, correctness checks and unresolved limits separately. Field confirmation remains pending after a fresh deployment until sufficient new samples exist.
 
 References: [Web Vitals](https://web.dev/articles/vitals), [INP](https://web.dev/articles/inp), [React Native performance](https://reactnative.dev/docs/performance).
+
+## Claims and optional regression budgets
+
+Check a supplied method, header, size and version against the actual source before describing it. Unknown costs are candidates; a function name is not a measurement. For application CI, adapt an existing Lighthouse CI assertion/budget or equivalent route-specific check, and keep thresholds and conditions explicit. A budget is a project decision, not a guarantee of field Web Vitals. Use opt-in tooling and local artifacts rather than adding automatic audits to hooks. See [Lighthouse CI assertions](https://googlechrome.github.io/lighthouse-ci/docs/configuration.html#assert).

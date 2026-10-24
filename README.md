@@ -63,7 +63,7 @@ For local Claude development, use `claude --plugin-dir ./plugins/performance-eng
 
 </details>
 
-**Requirements:** Node.js **22+** on the agent's execution PATH and a host version with plugin/command-hook support. Tested versions are listed in the [validation report](docs/validation.md).
+**Requirements:** Node.js **22+** on the agent's execution PATH and a host version with plugin/command-hook support. Tested versions are listed in the [validation report](docs/validation-v0.2.0.md).
 
 The installed plugin has **zero runtime package dependencies**. It needs no MCP server, API key or additional account. Use the browser, server and device tooling already available in your project; missing profilers lead to explicit verification steps and evidence limits.
 
@@ -146,15 +146,36 @@ PowerShell: set `$env:PERFORMANCE_ENGINEERING_HOOKS = "off"` before launch. Host
 
 | Evidence | Observed result |
 |---|---|
-| Hook-process benchmark | **74.99 ms p95** across **45** local macOS samples, including fresh Node startup |
-| Deterministic tests | **15 tests**, passing on **Linux, macOS and Windows** with Node 22 |
+| Hook-process benchmark | **73.09 ms p95** across **45** local macOS samples, including fresh Node startup |
+| Deterministic tests | **19 tests**, passing on **Linux, macOS and Windows** with Node 22 |
 | Installation | Universal, explicit Codex and explicit Claude routes verified against actual installed files |
 | Native hosts | Both agents receive guidance after a real scratch-file write; Codex uses normal reviewed hook trust |
-| Agent behavior | **24 final paired static reviews** covering six scenarios in both agents |
+| Agent behavior | **24 historical paired reviews + 12 targeted v0.2.0 reviews** covering six scenarios in both agents |
 
-The measured hook-process p95 was **25% below our 100 ms target**. This measures hook startup and execution on one machine. Website and application speed gains require comparable measurements of the application itself.
+The measured hook-process p95 was **27% below our 100 ms target**. This measures hook startup and execution on one machine. Website and application speed gains require comparable measurements of the application itself.
 
-Read the [full validation report](docs/validation.md) and [sanitized agent responses](validation/agent-results.json) for methods, earlier diagnostic runs and residual model-output warnings. Baseline agents already handle many issues well. These results support the stated checks; they do not establish a universal percentage improvement or guarantee instruction following.
+Read the [full validation report](docs/validation-v0.2.0.md) and [sanitized agent responses](validation/agent-results.json) for methods, earlier diagnostic runs and residual model-output warnings. Baseline agents already handle many issues well. These results support the stated checks; they do not establish a universal percentage improvement or guarantee instruction following.
+
+## Runnable examples and v0.2.0 improvements
+
+The router now recognizes requests such as “Add lazy loading to images below the fold” and “Optimaliseer afbeeldingen voor mobiel”. New recipes cover hero/offscreen media, optional editors, ETag/304 revalidation, `scheduler.yield()` with a fallback, history restoration and durable mutation recovery.
+
+| Controlled local reference case | Baseline median | Improved median |
+|---|---:|---:|
+| Primary-content DOM update | 661.40 ms | 109.60 ms |
+| Encoded image response bytes | 320,535 bytes | 17,500 bytes |
+| Double-frame feedback proxy | 141.40 ms | 64.00 ms |
+
+These are **hand-authored synthetic reference variants**, with five trials each, rather than a causal estimate of installing the plugin. Both interaction variants complete 120 work units; scheduling prioritizes feedback and can lengthen total completion. The timing proxies are separate from LCP and field INP. See [conditions, raw trials and limits](validation/labs-v0.2.0.json).
+
+```bash
+npm ci
+npm run labs:assets
+npx playwright install chromium
+npm run bench:labs -- --assert-budgets
+```
+
+The [labs](labs/README.md) also verify real conditional HTTP responses, concurrent/restarted writers, replay after a lost reply and actual bfcache restoration after a scope change. A manually dispatched browser CI workflow enforces configurable synthetic budgets; hooks never run it. Native context compaction has been exercised in both agents on macOS.
 
 ## Update or remove
 
@@ -185,7 +206,7 @@ npm run check
 npm run bench:hooks
 ```
 
-Identity and version metadata come from `plugin.meta.json`. Generation synchronizes native manifests, the portable export manifest, hook configurations and both marketplace catalogs. Explicit authenticated evaluations and native/installer smoke tests are documented in [validation](docs/validation.md) and the [evaluation methodology](evals/README.md).
+Identity and version metadata come from `plugin.meta.json`. Generation synchronizes native manifests, the portable export manifest, hook configurations and both marketplace catalogs. Explicit authenticated evaluations and native/installer smoke tests are documented in [validation](docs/validation-v0.2.0.md) and the [evaluation methodology](evals/README.md).
 
 Bring a concrete journey, a reproducible fixture or a measured before/after result. Keep scope proportional, preserve the existing stack, and explain what the evidence establishes. The [SVG artwork](assets/README.md) is editable and available for sharing under the repository's MIT license.
 

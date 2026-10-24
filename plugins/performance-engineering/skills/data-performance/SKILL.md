@@ -20,3 +20,5 @@ Read [Scheduling, cache and concurrency](references/data-contracts.md) for multi
 ## Verify
 
 Use the shared [measurement contract](../performance-engineering/references/measurement.md). Exercise cold/warm reads, scope switches, deduplication, failure and retry, late responses, repeated writes, and invalidation after mutation. Confirm that tenant changes never display another scope's cached data and that the persisted final value matches the latest intended state.
+
+For multiple writers, client restarts or a response lost after commit, use [Concurrent mutation protocol](references/mutation-protocol.md).

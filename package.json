@@ -1,6 +1,6 @@
 {
   "name": "performance-engineering-plugin",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "engines": {
@@ -12,9 +12,15 @@
     "test": "node --test tests/*.test.mjs",
     "check": "npm run validate && npm test",
     "bench:hooks": "node scripts/benchmark-hooks.mjs",
-    "eval:agents": "node scripts/evaluate-agents.mjs"
+    "eval:agents": "node scripts/evaluate-agents.mjs",
+    "labs:assets": "node labs/build-assets.mjs",
+    "labs:start": "node labs/server.mjs",
+    "bench:labs": "node scripts/benchmark-labs.mjs",
+    "build:release": "node scripts/build-release.mjs"
   },
   "devDependencies": {
+    "playwright": "1.64.1",
+    "sharp": "0.35.5",
     "yaml": "2.9.1"
   }
 }

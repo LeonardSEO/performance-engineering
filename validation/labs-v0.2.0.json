@@ -1,0 +1,485 @@
+{
+  "version": "0.2.0",
+  "node": "v26.8.1",
+  "platform": "darwin",
+  "browser": "156.0.8078.4",
+  "samplesPerVariant": 5,
+  "conditions": "Local loopback, Chromium headless, 1000x800 CSS px, DPR 1, fresh context per trial, interleaved order, no network/CPU emulation. Delays and CPU workload are controlled synthetic fixture inputs.",
+  "attribution": "Hand-authored reference variants implementing documented patterns. This is not an agent-generated implementation experiment or a universal plugin effect estimate.",
+  "metrics": "primaryMs: navigation-to-primary DOM update, not LCP. acknowledgmentProxyMs: click-handler start to a double-frame callback, not field INP. imageBytes: encoded image response bodies.",
+  "summary": [
+    {
+      "scenario": "loading",
+      "metric": "primaryMs",
+      "baseline": {
+        "median": 661.4000000059605,
+        "min": 659.1000000238419,
+        "max": 682.8000000119209
+      },
+      "improved": {
+        "median": 109.59999999403954,
+        "min": 108.90000000596046,
+        "max": 111.09999999403954
+      },
+      "medianReductionPercent": 83.42908981054553
+    },
+    {
+      "scenario": "assets",
+      "metric": "imageBytes",
+      "baseline": {
+        "median": 320535,
+        "min": 320535,
+        "max": 320535
+      },
+      "improved": {
+        "median": 17500,
+        "min": 17500,
+        "max": 17500
+      },
+      "medianReductionPercent": 94.54037780585584
+    },
+    {
+      "scenario": "interaction",
+      "metric": "acknowledgmentProxyMs",
+      "baseline": {
+        "median": 141.40000000596046,
+        "min": 139.90000000596046,
+        "max": 144.30000001192093
+      },
+      "improved": {
+        "median": 64,
+        "min": 63.79999998211861,
+        "max": 65.09999999403954
+      },
+      "medianReductionPercent": 54.73833097786266
+    }
+  ],
+  "checks": [
+    {
+      "scenario": "loading",
+      "metric": "primaryMs",
+      "actual": 109.59999999403954,
+      "maximum": 450,
+      "passed": true
+    },
+    {
+      "scenario": "assets",
+      "metric": "imageBytes",
+      "actual": 17500,
+      "maximum": 100000,
+      "passed": true
+    },
+    {
+      "scenario": "interaction",
+      "metric": "acknowledgmentProxyMs",
+      "actual": 64,
+      "maximum": 100,
+      "passed": true
+    }
+  ],
+  "history": {
+    "persisted": true,
+    "snapshotMasked": true,
+    "scope": "b",
+    "text": "Authorized fixture scope b",
+    "notRestoredReasons": []
+  },
+  "correctness": {
+    "optionalFailurePreservesPrimary": true,
+    "bothVariantsComplete120Jobs": true,
+    "bothVariantsRetainShell": true,
+    "scopeRevalidatedAfterRealHistoryNavigation": true
+  },
+  "runs": [
+    {
+      "scenario": "loading",
+      "variant": "baseline",
+      "iteration": 0,
+      "primaryMs": 682.8000000119209,
+      "acknowledgmentProxyMs": null,
+      "completionMs": null,
+      "completedJobs": 0,
+      "maxInteractionLongTaskMs": 0,
+      "imageBytes": 0,
+      "primary": "Primary content ready",
+      "shell": true
+    },
+    {
+      "scenario": "loading",
+      "variant": "improved",
+      "iteration": 0,
+      "primaryMs": 108.90000000596046,
+      "acknowledgmentProxyMs": null,
+      "completionMs": null,
+      "completedJobs": 0,
+      "maxInteractionLongTaskMs": 0,
+      "imageBytes": 0,
+      "primary": "Primary content ready",
+      "shell": true
+    },
+    {
+      "scenario": "loading",
+      "variant": "improved",
+      "iteration": 1,
+      "primaryMs": 110.90000000596046,
+      "acknowledgmentProxyMs": null,
+      "completionMs": null,
+      "completedJobs": 0,
+      "maxInteractionLongTaskMs": 0,
+      "imageBytes": 0,
+      "primary": "Primary content ready",
+      "shell": true
+    },
+    {
+      "scenario": "loading",
+      "variant": "baseline",
+      "iteration": 1,
+      "primaryMs": 662.5999999940395,
+      "acknowledgmentProxyMs": null,
+      "completionMs": null,
+      "completedJobs": 0,
+      "maxInteractionLongTaskMs": 0,
+      "imageBytes": 0,
+      "primary": "Primary content ready",
+      "shell": true
+    },
+    {
+      "scenario": "loading",
+      "variant": "baseline",
+      "iteration": 2,
+      "primaryMs": 661.4000000059605,
+      "acknowledgmentProxyMs": null,
+      "completionMs": null,
+      "completedJobs": 0,
+      "maxInteractionLongTaskMs": 0,
+      "imageBytes": 0,
+      "primary": "Primary content ready",
+      "shell": true
+    },
+    {
+      "scenario": "loading",
+      "variant": "improved",
+      "iteration": 2,
+      "primaryMs": 111.09999999403954,
+      "acknowledgmentProxyMs": null,
+      "completionMs": null,
+      "completedJobs": 0,
+      "maxInteractionLongTaskMs": 0,
+      "imageBytes": 0,
+      "primary": "Primary content ready",
+      "shell": true
+    },
+    {
+      "scenario": "loading",
+      "variant": "improved",
+      "iteration": 3,
+      "primaryMs": 109.59999999403954,
+      "acknowledgmentProxyMs": null,
+      "completionMs": null,
+      "completedJobs": 0,
+      "maxInteractionLongTaskMs": 0,
+      "imageBytes": 0,
+      "primary": "Primary content ready",
+      "shell": true
+    },
+    {
+      "scenario": "loading",
+      "variant": "baseline",
+      "iteration": 3,
+      "primaryMs": 659.1000000238419,
+      "acknowledgmentProxyMs": null,
+      "completionMs": null,
+      "completedJobs": 0,
+      "maxInteractionLongTaskMs": 0,
+      "imageBytes": 0,
+      "primary": "Primary content ready",
+      "shell": true
+    },
+    {
+      "scenario": "loading",
+      "variant": "baseline",
+      "iteration": 4,
+      "primaryMs": 660.1000000238419,
+      "acknowledgmentProxyMs": null,
+      "completionMs": null,
+      "completedJobs": 0,
+      "maxInteractionLongTaskMs": 0,
+      "imageBytes": 0,
+      "primary": "Primary content ready",
+      "shell": true
+    },
+    {
+      "scenario": "loading",
+      "variant": "improved",
+      "iteration": 4,
+      "primaryMs": 109.09999999403954,
+      "acknowledgmentProxyMs": null,
+      "completionMs": null,
+      "completedJobs": 0,
+      "maxInteractionLongTaskMs": 0,
+      "imageBytes": 0,
+      "primary": "Primary content ready",
+      "shell": true
+    },
+    {
+      "scenario": "assets",
+      "variant": "baseline",
+      "iteration": 0,
+      "primaryMs": 671.3000000119209,
+      "acknowledgmentProxyMs": null,
+      "completionMs": null,
+      "completedJobs": 0,
+      "maxInteractionLongTaskMs": 0,
+      "imageBytes": 320535,
+      "primary": "Primary content ready",
+      "shell": true
+    },
+    {
+      "scenario": "assets",
+      "variant": "improved",
+      "iteration": 0,
+      "primaryMs": 113.89999997615814,
+      "acknowledgmentProxyMs": null,
+      "completionMs": null,
+      "completedJobs": 0,
+      "maxInteractionLongTaskMs": 0,
+      "imageBytes": 17500,
+      "primary": "Primary content ready",
+      "shell": true
+    },
+    {
+      "scenario": "assets",
+      "variant": "improved",
+      "iteration": 1,
+      "primaryMs": 109.30000001192093,
+      "acknowledgmentProxyMs": null,
+      "completionMs": null,
+      "completedJobs": 0,
+      "maxInteractionLongTaskMs": 0,
+      "imageBytes": 17500,
+      "primary": "Primary content ready",
+      "shell": true
+    },
+    {
+      "scenario": "assets",
+      "variant": "baseline",
+      "iteration": 1,
+      "primaryMs": 663.6999999880791,
+      "acknowledgmentProxyMs": null,
+      "completionMs": null,
+      "completedJobs": 0,
+      "maxInteractionLongTaskMs": 0,
+      "imageBytes": 320535,
+      "primary": "Primary content ready",
+      "shell": true
+    },
+    {
+      "scenario": "assets",
+      "variant": "baseline",
+      "iteration": 2,
+      "primaryMs": 661,
+      "acknowledgmentProxyMs": null,
+      "completionMs": null,
+      "completedJobs": 0,
+      "maxInteractionLongTaskMs": 0,
+      "imageBytes": 320535,
+      "primary": "Primary content ready",
+      "shell": true
+    },
+    {
+      "scenario": "assets",
+      "variant": "improved",
+      "iteration": 2,
+      "primaryMs": 108.40000000596046,
+      "acknowledgmentProxyMs": null,
+      "completionMs": null,
+      "completedJobs": 0,
+      "maxInteractionLongTaskMs": 0,
+      "imageBytes": 17500,
+      "primary": "Primary content ready",
+      "shell": true
+    },
+    {
+      "scenario": "assets",
+      "variant": "improved",
+      "iteration": 3,
+      "primaryMs": 116,
+      "acknowledgmentProxyMs": null,
+      "completionMs": null,
+      "completedJobs": 0,
+      "maxInteractionLongTaskMs": 0,
+      "imageBytes": 17500,
+      "primary": "Primary content ready",
+      "shell": true
+    },
+    {
+      "scenario": "assets",
+      "variant": "baseline",
+      "iteration": 3,
+      "primaryMs": 660.3999999761581,
+      "acknowledgmentProxyMs": null,
+      "completionMs": null,
+      "completedJobs": 0,
+      "maxInteractionLongTaskMs": 0,
+      "imageBytes": 320535,
+      "primary": "Primary content ready",
+      "shell": true
+    },
+    {
+      "scenario": "assets",
+      "variant": "baseline",
+      "iteration": 4,
+      "primaryMs": 663,
+      "acknowledgmentProxyMs": null,
+      "completionMs": null,
+      "completedJobs": 0,
+      "maxInteractionLongTaskMs": 0,
+      "imageBytes": 320535,
+      "primary": "Primary content ready",
+      "shell": true
+    },
+    {
+      "scenario": "assets",
+      "variant": "improved",
+      "iteration": 4,
+      "primaryMs": 116.89999997615814,
+      "acknowledgmentProxyMs": null,
+      "completionMs": null,
+      "completedJobs": 0,
+      "maxInteractionLongTaskMs": 0,
+      "imageBytes": 17500,
+      "primary": "Primary content ready",
+      "shell": true
+    },
+    {
+      "scenario": "interaction",
+      "variant": "baseline",
+      "iteration": 0,
+      "primaryMs": 658.7000000178814,
+      "acknowledgmentProxyMs": 144.30000001192093,
+      "completionMs": 121.09999999403954,
+      "completedJobs": 120,
+      "maxInteractionLongTaskMs": 0,
+      "imageBytes": 0,
+      "primary": "Primary content ready",
+      "shell": true
+    },
+    {
+      "scenario": "interaction",
+      "variant": "improved",
+      "iteration": 0,
+      "primaryMs": 107.7999999821186,
+      "acknowledgmentProxyMs": 63.79999998211861,
+      "completionMs": 178.09999999403954,
+      "completedJobs": 120,
+      "maxInteractionLongTaskMs": 0,
+      "imageBytes": 0,
+      "primary": "Primary content ready",
+      "shell": true
+    },
+    {
+      "scenario": "interaction",
+      "variant": "improved",
+      "iteration": 1,
+      "primaryMs": 115.19999998807907,
+      "acknowledgmentProxyMs": 65.09999999403954,
+      "completionMs": 179.40000000596046,
+      "completedJobs": 120,
+      "maxInteractionLongTaskMs": 0,
+      "imageBytes": 0,
+      "primary": "Primary content ready",
+      "shell": true
+    },
+    {
+      "scenario": "interaction",
+      "variant": "baseline",
+      "iteration": 1,
+      "primaryMs": 660.5,
+      "acknowledgmentProxyMs": 142.2000000178814,
+      "completionMs": 120.10000002384186,
+      "completedJobs": 120,
+      "maxInteractionLongTaskMs": 121,
+      "imageBytes": 0,
+      "primary": "Primary content ready",
+      "shell": true
+    },
+    {
+      "scenario": "interaction",
+      "variant": "baseline",
+      "iteration": 2,
+      "primaryMs": 659.3000000119209,
+      "acknowledgmentProxyMs": 139.90000000596046,
+      "completionMs": 120.2000000178814,
+      "completedJobs": 120,
+      "maxInteractionLongTaskMs": 121,
+      "imageBytes": 0,
+      "primary": "Primary content ready",
+      "shell": true
+    },
+    {
+      "scenario": "interaction",
+      "variant": "improved",
+      "iteration": 2,
+      "primaryMs": 107.2999999821186,
+      "acknowledgmentProxyMs": 64,
+      "completionMs": 178.5,
+      "completedJobs": 120,
+      "maxInteractionLongTaskMs": 0,
+      "imageBytes": 0,
+      "primary": "Primary content ready",
+      "shell": true
+    },
+    {
+      "scenario": "interaction",
+      "variant": "improved",
+      "iteration": 3,
+      "primaryMs": 110,
+      "acknowledgmentProxyMs": 63.80000001192093,
+      "completionMs": 178.09999999403954,
+      "completedJobs": 120,
+      "maxInteractionLongTaskMs": 0,
+      "imageBytes": 0,
+      "primary": "Primary content ready",
+      "shell": true
+    },
+    {
+      "scenario": "interaction",
+      "variant": "baseline",
+      "iteration": 3,
+      "primaryMs": 660.3000000119209,
+      "acknowledgmentProxyMs": 141.10000002384186,
+      "completionMs": 120.40000000596046,
+      "completedJobs": 120,
+      "maxInteractionLongTaskMs": 121,
+      "imageBytes": 0,
+      "primary": "Primary content ready",
+      "shell": true
+    },
+    {
+      "scenario": "interaction",
+      "variant": "baseline",
+      "iteration": 4,
+      "primaryMs": 659.1000000238419,
+      "acknowledgmentProxyMs": 141.40000000596046,
+      "completionMs": 120.69999998807907,
+      "completedJobs": 120,
+      "maxInteractionLongTaskMs": 121,
+      "imageBytes": 0,
+      "primary": "Primary content ready",
+      "shell": true
+    },
+    {
+      "scenario": "interaction",
+      "variant": "improved",
+      "iteration": 4,
+      "primaryMs": 110.19999998807907,
+      "acknowledgmentProxyMs": 64.7000000178814,
+      "completionMs": 179.09999999403954,
+      "completedJobs": 120,
+      "maxInteractionLongTaskMs": 0,
+      "imageBytes": 0,
+      "primary": "Primary content ready",
+      "shell": true
+    }
+  ]
+}

@@ -1,0 +1,46 @@
+[
+  {
+    "host": "codex",
+    "version": "0.163.0",
+    "nativeCompactionCompleted": true,
+    "initialHookEvents": [
+      "sessionStart",
+      "userPromptSubmit"
+    ],
+    "hookRuns": [
+      {
+        "event": "sessionStart",
+        "status": "completed",
+        "hasAssetGuidance": false,
+        "hasRouterGuidance": true
+      },
+      {
+        "event": "userPromptSubmit",
+        "status": "completed",
+        "hasAssetGuidance": true,
+        "hasRouterGuidance": false
+      },
+      {
+        "event": "sessionStart",
+        "status": "completed",
+        "hasAssetGuidance": false,
+        "hasRouterGuidance": true
+      },
+      {
+        "event": "userPromptSubmit",
+        "status": "completed",
+        "hasAssetGuidance": true,
+        "hasRouterGuidance": false
+      }
+    ],
+    "postCompactionAssetGuidance": true
+  },
+  {
+    "host": "claude",
+    "version": "2.1.303",
+    "nativeCompactionCompleted": true,
+    "sessionStartOnCompact": true,
+    "postCompactionAssetGuidance": true,
+    "afterResponseHasAssetSkill": true
+  }
+]

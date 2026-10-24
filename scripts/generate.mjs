@@ -8,10 +8,10 @@ const write = (file, value) => {
   const full = path.join(root,file);fs.mkdirSync(path.dirname(full),{recursive:true});fs.writeFileSync(full,JSON.stringify(value,null,2)+'\n');
 };
 const identity = {name:m.name,version:m.version,description:m.description,author:m.author,repository:m.repository,homepage:m.repository,license:m.license};
-const iface = {displayName:m.displayName,shortDescription:m.shortDescription,longDescription:m.description,developerName:m.author.name,category:'Developer Tools',capabilities:[],defaultPrompt:'Diagnose the bottleneck, select relevant skills, preserve correctness, and compare equivalent measurements.'};
+const iface = {displayName:m.displayName,shortDescription:m.shortDescription,longDescription:m.description,developerName:m.publisher?.name??m.author.name,category:'Developer Tools',logo:'./assets/logo.png',composerIcon:'./assets/logo.png',websiteURL:m.repository,supportURL:m.repository+'/issues',privacyPolicyURL:m.repository+'/blob/main/docs/hooks.md',termsOfServiceURL:m.repository+'/blob/main/LICENSE',capabilities:[],defaultPrompt:'Diagnose the bottleneck, select relevant skills, preserve correctness, and compare equivalent measurements.'};
 // Codex 0.163 skips hooks for a portable manifest selected at the runtime root.
 // Keep its portable export manifest separate from the native runtime package.
-write('packaging/portable-plugin.json',{$schema:'https://agent-plugins.org/schemas/1.0.0/plugin.schema.json',...identity,extensions:{'com.openai':{interface:iface,hooks:'./hooks/codex.json'}}});
+write('packaging/portable-plugin.json',{$schema:'https://agent-plugins.org/schemas/1.0.0/plugin.schema.json',...identity,extensions:{'com.openai':{interface:iface,hooks:'./hooks/codex.json',review:{commerce:m.publisher.commerce,commerce_description:'This plugin is completely free and does not sell products or process payments.'},publication:{release_notes:'Improved bilingual routing, loading/cache/scheduling/history recipes, executable labs and mutation recovery tests.',countries:m.publisher.countries}}}});
 const rootManifest = path.join(root, folder, 'plugin.json');
 if (fs.existsSync(rootManifest)) {
   if (JSON.parse(fs.readFileSync(rootManifest,'utf8')).name !== m.name) throw new Error('Refusing to remove an unrelated manifest');

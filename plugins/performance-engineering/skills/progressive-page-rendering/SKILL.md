@@ -24,3 +24,5 @@ Read [Readiness and skeletons](references/readiness.md) when changing loading bo
 ## Verify
 
 Check cold entry, direct detail URLs, repeat navigation, refresh, scope changes, missing permissions, partial failure and delayed optional sections. Confirm stable geometry, no false zero/empty flash, no incomplete save, and that useful primary content is not gated by secondary data. Use [Measurement](../performance-engineering/references/measurement.md) to distinguish shell paint from useful content and final completion.
+
+For Back/Forward navigation, read [History restoration](references/history-restoration.md) before treating a restored page as freshly authorized or loaded.

@@ -27,3 +27,5 @@ Keep motion small and interruptible, preserve focus and labels, and support redu
 ## Verify
 
 Check fast and stalled requests, rejection/offline, repeated actions, out-of-order completion, unmount, cancel and retry. Measure acknowledgment separately from later network outcomes using [Measurement](../performance-engineering/references/measurement.md). A loader is feedback, not proof of real latency improvement.
+
+When a save can race or finish ambiguously, apply the [shared mutation protocol](../data-performance/references/mutation-protocol.md) before claiming persistence.

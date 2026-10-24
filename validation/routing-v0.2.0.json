@@ -1,0 +1,6 @@
+{
+  "cases": 23,
+  "positiveCases": 16,
+  "negativeCases": 7,
+  "method": "Exact corpus assertions plus negative exclusions in npm test; this finite corpus does not establish universal language recognition."
+}
