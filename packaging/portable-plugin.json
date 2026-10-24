@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "performance-engineering",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Nine focused skills and advisory hooks for evidence-led web, fullstack, React and React Native performance engineering.",
   "author": {
     "name": "Leonard van Hemert"

@@ -1,6 +1,6 @@
 {
   "name": "performance-engineering",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "displayName": "Performance Engineering",
   "shortDescription": "Evidence-led performance",
   "description": "Nine focused skills and advisory hooks for evidence-led web, fullstack, React and React Native performance engineering.",
