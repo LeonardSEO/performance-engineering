@@ -94,7 +94,9 @@ const DOC_ONLY = /\b(?:readme|documentation|spelling|typo|punctuation|license|li
 
 export function routePrompt(prompt, stack = 'unknown') {
   if (typeof prompt !== 'string' || prompt.length > MAX_FILE || !PERF.test(prompt)) return [];
-  const positiveIntent = prompt.replace(/\b(?:do not|don't|never|niet)\b[^.!?\n]*/gi, '');
+  // Attached examples or evaluation instructions must not turn a code task
+  // into a documentation-only task. The opening request owns that decision.
+  const positiveIntent = prompt.split(/\n\s*\n/, 1)[0].replace(/\b(?:do not|don't|never|niet)\b[^.!?\n]*/gi, '');
   if (DOC_ONLY.test(positiveIntent) && !/\b(?:implement|code|fix (?:the )?(?:app|page|api)|application|runtime|profiler|implementeren)\b/i.test(positiveIntent)) return [];
   const scores = new Map();
   const add = (domain, score) => scores.set(domain, (scores.get(domain) ?? 0) + score);
@@ -102,7 +104,7 @@ export function routePrompt(prompt, stack = 'unknown') {
   if (/\b(?:database|sql|n\+1|api|query|queries|endpoint|connection pool|backend|server latency)\b/i.test(prompt)) add('backend-performance', 50);
   if (/waterfall|prefetch|dedup|out.of.order|stale|verouderd|tenant|cach|request|data load|fetch/i.test(prompt)) add('data-performance', 30);
   if (/optimistic|optimistisch|toggle|button|click|tap|save|saving|progress|feedback|rollback|opslaan|voortgang|knop/i.test(prompt)) add('doherty-threshold', 45);
-  if (/\blcp\b|image|font|bundle|stylesheet|third.party|compression|resource|afbeelding/i.test(prompt)) add('asset-performance', 40);
+  if (/\blcp\b|image|font|bundle|stylesheet|third.party|compression|resource|afbeelding|<img\b|\.(?:jpe?g|avif|webp|woff2?)\b/i.test(prompt)) add('asset-performance', 40);
   if (/skeleton|shell|full.page|cold navigation|progressive|loading screen|page chrome|laadscherm/i.test(prompt)) add('progressive-page-rendering', 45);
   if (/main.thread|layout|paint|animation|motion|scroll|jank|dom\b|long task|rendering/i.test(prompt)) add('rendering-performance', 35);
   if (/\breact\b|next\.?js|hydration|suspense|server component|re.render|memoization/i.test(prompt) && !scores.has('react-native-performance') && stack !== 'native') add('react-performance', 55);
@@ -143,7 +145,7 @@ export function routeFiles(files, cwd) {
 function stateDirectory(cwd, base) {
   const root = base || process.env.PLUGIN_DATA || process.env.CLAUDE_PLUGIN_DATA || path.join(os.tmpdir(), 'performance-engineering');
   const dir = path.resolve(root, 'hook-state-v1');
-  if (within(cwd, dir)) throw new Error('State must remain outside the user project');
+  if (within(cwd, canonicalPath(dir))) throw new Error('State must remain outside the user project');
   fs.mkdirSync(dir, { recursive: true, mode: 0o700 });
   if (fs.lstatSync(dir).isSymbolicLink() || within(cwd, fs.realpathSync(dir))) throw new Error('Unsafe state path');
   return dir;

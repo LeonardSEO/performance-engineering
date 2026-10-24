@@ -19,6 +19,15 @@ function fixture(t, pkg = {}) {
   return {root,cwd,dataRoot,input,run,write};
 }
 const context = out => out ? JSON.parse(out).hookSpecificOutput.additionalContext : '';
+test('complete evaluation payloads route by the actual opening request',t=>{
+  const f=fixture(t),cases=JSON.parse(fs.readFileSync(new URL('../evals/cases.json',import.meta.url)));
+  for(const c of cases){
+    const prompt=c.prompt+'\n\nThe complete fixture source follows.\n'+JSON.stringify(c.files)+'\n\nFor the spelling-only task follow its output requirement.';
+    const out=context(f.run('UserPromptSubmit',{session_id:c.id,prompt}));
+    if(!c.domains.length)assert.equal(out,'');
+    else assert.ok(c.domains.some(domain=>out.includes('/'+domain+'/')),c.id);
+  }
+});
 for (const host of ['codex','claude']) {
   test(`${host}: routes only relevant English and Dutch prompts with valid JSON`, t => {
     const f = fixture(t);
@@ -107,6 +116,12 @@ test('parallel hooks cannot corrupt state or inject the same domain twice',async
   assert.ok(results.every(r=>r.code===0 && !r.err));assert.equal(results.filter(r=>r.out).length,1);
   const stateFiles=fs.readdirSync(path.join(f.dataRoot,'hook-state-v1')).filter(n=>n.endsWith('.json'));
   assert.equal(stateFiles.length,1);assert.deepEqual(JSON.parse(fs.readFileSync(path.join(f.dataRoot,'hook-state-v1',stateFiles[0]))).domains,['asset-performance']);
+});
+test('a state-directory symlink cannot create metadata in the user project',t=>{
+  const f=fixture(t),link=path.join(f.root,'state-link');
+  try {fs.symlinkSync(f.cwd,link,'junction');} catch(error) {if(error.code==='EPERM'){t.skip('Symlink privileges unavailable');return;}throw error;}
+  const result=handleHook(f.input('UserPromptSubmit',{prompt:'Optimize slow API queries.'}),{host:'codex',pluginRoot,dataRoot:link});
+  assert.equal(result,'');assert.ok(!fs.existsSync(path.join(f.cwd,'hook-state-v1')));
 });
 test('state count and TTL are bounded; documented opt-out is silent',t=>{
   const f=fixture(t);const dir=path.join(f.dataRoot,'hook-state-v1');fs.mkdirSync(dir,{recursive:true});
