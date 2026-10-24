@@ -51,6 +51,8 @@ Open a new session or use the host's reload flow. During development, load only 
 - A current Codex or Claude Code version with plugin and command-hook support. See [validation](docs/validation.md) for the versions actually tested.
 - Existing application tooling for the measurement you want to perform. Browser profilers and native device tools are optional capabilities, not bundled services.
 
+The native runtime intentionally has no root `plugin.json`: Codex 0.163.0 skips hooks for that portable format even when a compatibility overlay exists. `packaging/portable-plugin.json` is supplied separately for portable export; use the native package for the tested hook behavior.
+
 The installed plugin has **zero runtime package dependencies** and no MCP server, API key, account, production telemetry, or background network service. The development YAML parser is not required by installed hooks.
 
 ## Skills
@@ -154,7 +156,7 @@ npm run check
 npm run bench:hooks
 ```
 
-`plugin.meta.json` is the single source for identity/version metadata. Generation produces portable and compatibility manifests, host hook adapters, and both marketplace catalogs. The CI matrix runs Node 22 on Linux, macOS and Windows.
+`plugin.meta.json` is the single source for identity/version metadata. Generation produces native compatibility manifests, a separate portable export manifest, host hook adapters, and both marketplace catalogs. The CI matrix runs Node 22 on Linux, macOS and Windows.
 
 The [validation report](docs/validation.md) distinguishes deterministic tests, native loader/installation checks, agent behavior evaluations and unverified conditions. Agent evals use existing authenticated CLIs, run only when explicitly requested with `npm run eval:agents`, and are not part of normal hooks or CI. See [evaluation methodology](evals/README.md).
 

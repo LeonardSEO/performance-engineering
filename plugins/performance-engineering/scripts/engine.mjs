@@ -8,7 +8,7 @@ export const DOMAINS = Object.freeze({
   'data-performance': 'Preserve authorization/scope prerequisites, bound independent reads, and protect newer intent and persisted writes.',
   'backend-performance': 'Trace server/query/pool time; preserve tenant isolation and inspect plans before tuning indexes or caches.',
   'progressive-page-rendering': 'Reveal an authorized shell and independent ready regions; keep incomplete editors unavailable.',
-  'asset-performance': 'Inspect the measured critical resource path; do not lazy-load the actual LCP image or preload everything.',
+  'asset-performance': 'Inspect the critical path; filenames do not establish file sizes or dimensions. Source-only claims are hypotheses.',
   'doherty-threshold': 'Acknowledge immediately, reconcile safe optimistic changes, and show honest progress without artificial waits.',
   'rendering-performance': 'Profile main-thread/layout/paint work; keep motion interruptible and respect reduced motion.',
   'react-performance': 'Check React DOM/Next.js versions, request-local state, streaming boundaries and actual render cost.',
@@ -99,7 +99,7 @@ export function routePrompt(prompt, stack = 'unknown') {
   const scores = new Map();
   const add = (domain, score) => scores.set(domain, (scores.get(domain) ?? 0) + score);
   if (/react[ -]?native|\bexpo\b|hermes|turbo.?module|native startup|js.?thread|ui.?thread/i.test(prompt)) add('react-native-performance', 100);
-  if (/\b(?:database|sql|n\+1|query plan|queries|endpoint|connection pool|backend|server latency)\b/i.test(prompt)) add('backend-performance', 50);
+  if (/\b(?:database|sql|n\+1|api|query|queries|endpoint|connection pool|backend|server latency)\b/i.test(prompt)) add('backend-performance', 50);
   if (/waterfall|prefetch|dedup|out.of.order|stale|verouderd|tenant|cach|request|data load|fetch/i.test(prompt)) add('data-performance', 30);
   if (/optimistic|optimistisch|toggle|button|click|tap|save|saving|progress|feedback|rollback|opslaan|voortgang|knop/i.test(prompt)) add('doherty-threshold', 45);
   if (/\blcp\b|image|font|bundle|stylesheet|third.party|compression|resource|afbeelding/i.test(prompt)) add('asset-performance', 40);

@@ -9,7 +9,14 @@ const write = (file, value) => {
 };
 const identity = {name:m.name,version:m.version,description:m.description,author:m.author,repository:m.repository,homepage:m.repository,license:m.license};
 const iface = {displayName:m.displayName,shortDescription:m.shortDescription,longDescription:m.description,developerName:m.author.name,category:'Developer Tools',capabilities:[],defaultPrompt:'Diagnose the bottleneck, select relevant skills, preserve correctness, and compare equivalent measurements.'};
-write(`${folder}/plugin.json`,{$schema:'https://agent-plugins.org/schemas/1.0.0/plugin.schema.json',...identity,extensions:{'com.openai':{interface:iface,hooks:'./hooks/codex.json'}}});
+// Codex 0.163 skips hooks for a portable manifest selected at the runtime root.
+// Keep its portable export manifest separate from the native runtime package.
+write('packaging/portable-plugin.json',{$schema:'https://agent-plugins.org/schemas/1.0.0/plugin.schema.json',...identity,extensions:{'com.openai':{interface:iface,hooks:'./hooks/codex.json'}}});
+const rootManifest = path.join(root, folder, 'plugin.json');
+if (fs.existsSync(rootManifest)) {
+  if (JSON.parse(fs.readFileSync(rootManifest,'utf8')).name !== m.name) throw new Error('Refusing to remove an unrelated manifest');
+  fs.unlinkSync(rootManifest);
+}
 write(`${folder}/.codex-plugin/plugin.json`,{...identity,skills:'./skills/',hooks:'./hooks/codex.json',interface:iface});
 write(`${folder}/.claude-plugin/plugin.json`,{...identity,hooks:'./hooks/claude.json'});
 for (const host of ['codex','claude']) {

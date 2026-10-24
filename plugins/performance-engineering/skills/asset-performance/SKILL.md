@@ -6,6 +6,8 @@ description: "Improve web loading and resource delivery when traces show late LC
 
 Follow the critical resource path from document response to useful paint. A smaller file is useful only if it addresses the actual bottleneck without sacrificing product behavior.
 
+Filenames are labels, not measurements: `editor-4mb.js` does not establish a 4 MB transfer, and `hero-5000px.jpg` does not establish actual pixel dimensions. Verify bytes, intrinsic dimensions, visibility and dependencies before stating them as facts or removing an apparently unused asset.
+
 Use [Resource delivery](references/resource-delivery.md) for images, fonts, bundles and caching. Begin with the shared [measurement contract](../performance-engineering/references/measurement.md).
 
 ## Prioritize

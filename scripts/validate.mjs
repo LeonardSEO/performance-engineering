@@ -7,9 +7,11 @@ const root=fileURLToPath(new URL('../',import.meta.url)),plugin=path.join(root,'
 const read=p=>JSON.parse(fs.readFileSync(path.join(root,p),'utf8'));
 const meta=read('plugin.meta.json');
 assert.match(meta.version,/^\d+\.\d+\.\d+$/);
-const manifests=['plugin.json','.codex-plugin/plugin.json','.claude-plugin/plugin.json'];
+const manifests=['.codex-plugin/plugin.json','.claude-plugin/plugin.json'];
 for(const name of manifests){const obj=JSON.parse(fs.readFileSync(path.join(plugin,name)));assert.equal(obj.name,meta.name);assert.equal(obj.version,meta.version);}
-const portable=JSON.parse(fs.readFileSync(path.join(plugin,'plugin.json')));
+const portable=read('packaging/portable-plugin.json');
+assert.equal(portable.version,meta.version);assert.equal(portable.name,meta.name);
+assert.ok(!fs.existsSync(path.join(plugin,'plugin.json')),'Native hooks require avoiding the Codex 0.163 portable-hook gate');
 assert.equal(portable.$schema,'https://agent-plugins.org/schemas/1.0.0/plugin.schema.json');
 assert.ok(portable.extensions['com.openai'].interface.shortDescription.length<=30);
 assert.ok(portable.extensions['com.openai'].interface.defaultPrompt.length<=128);

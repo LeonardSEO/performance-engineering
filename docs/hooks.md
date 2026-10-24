@@ -1,6 +1,6 @@
 # Hooks: execution, privacy and compatibility
 
-The two host adapters invoke the same zero-dependency Node engine. Portable/OpenAI and Codex compatibility manifests explicitly reference `hooks/codex.json`; Claude's manifest references `hooks/claude.json`. There is no default `hooks/hooks.json`, so installer rewrites of that default file cannot silently switch the other adapter's plugin-root variable.
+The two host adapters invoke the same zero-dependency Node engine. The Codex compatibility manifest explicitly references `hooks/codex.json`; Claude's manifest references `hooks/claude.json`. The portable export manifest is separate from the native runtime root. There is no default `hooks/hooks.json`, so installer rewrites of that default file cannot silently switch the other adapter's plugin-root variable.
 
 Codex uses `${PLUGIN_ROOT}` and Claude uses `${CLAUDE_PLUGIN_ROOT}` in its own configuration. The script resolves skill paths from its installed location. Both return event-specific `hookSpecificOutput.additionalContext` JSON on supported events; no deny/block/continue fields or nonzero policy exit codes are emitted.
 
@@ -31,3 +31,7 @@ The target is p95 below 100 ms on the stated test machine, including Node startu
 Codex requires review/trust of non-managed hooks. No installer step in this repository writes trust receipts or passes a trust-bypass flag. Unsupported/untrusted hooks do not make skill content unavailable. Review the scripts before trusting; changed definitions can require renewed review.
 
 References: [Codex hooks](https://learn.chatgpt.com/docs/hooks), [OpenAI packaging](https://developers.openai.com/plugins/build/plugins), [Claude hooks](https://code.claude.com/docs/en/hooks).
+
+## Tested Codex format limitation
+
+Codex 0.163.0 discovers skills from the portable Agent Plugins format but deliberately skips its hook loading in the runtime implementation. A compatibility overlay does not override that format gate. Therefore the tested native package has only `.codex-plugin/plugin.json` and `.claude-plugin/plugin.json`, with no root portable manifest. The separate generated `packaging/portable-plugin.json` supports explicit future export, but portable-hook operation is not claimed on this version. See the pinned [loader implementation](https://github.com/openai/codex/blob/rust-v0.163.0/codex-rs/core-plugins/src/loader.rs#L966).
