@@ -146,13 +146,13 @@ PowerShell: set `$env:PERFORMANCE_ENGINEERING_HOOKS = "off"` before launch. Host
 
 | Evidence | Observed result |
 |---|---|
-| Hook-process benchmark | **73.09 ms p95** across **45** local macOS samples, including fresh Node startup |
+| Hook-process benchmark | **83.15 ms p95** across **45** local macOS samples, including fresh Node startup |
 | Deterministic tests | **19 tests**, passing on **Linux, macOS and Windows** with Node 22 |
 | Installation | Universal, explicit Codex and explicit Claude routes verified against actual installed files |
 | Native hosts | Both agents receive guidance after a real scratch-file write; Codex uses normal reviewed hook trust |
 | Agent behavior | **24 historical paired reviews + 12 targeted v0.2.0 reviews** covering six scenarios in both agents |
 
-The measured hook-process p95 was **27% below our 100 ms target**. This measures hook startup and execution on one machine. Website and application speed gains require comparable measurements of the application itself.
+The controlled local hook run met the 100 ms p95 target. Another local run reached 180.94 ms p95; [all observations are retained](validation/hook-benchmark-v0.2.0-history.json). Process startup and host conditions matter. Website and application speed gains require comparable measurements of the application itself.
 
 Read the [full validation report](docs/validation-v0.2.0.md) and [sanitized agent responses](validation/agent-results.json) for methods, earlier diagnostic runs and residual model-output warnings. Baseline agents already handle many issues well. These results support the stated checks; they do not establish a universal percentage improvement or guarantee instruction following.
 

@@ -1,4 +1,4 @@
-// Deterministic native and portable ZIPs, using only Node built-ins.
+// Deterministic native ZIP; portable export is explicitly opt-in.
 import fs from 'node:fs';import path from 'node:path';import zlib from 'node:zlib';import crypto from 'node:crypto';import assert from 'node:assert/strict';import {fileURLToPath} from 'node:url';
 const repo=fileURLToPath(new URL('../',import.meta.url)),meta=JSON.parse(fs.readFileSync(path.join(repo,'plugin.meta.json'))),source=path.join(repo,'plugins',meta.name);
 const args=process.argv.slice(2),index=args.indexOf('--out'),out=path.resolve(index>=0?args[index+1]:path.join(repo,'..'));fs.mkdirSync(out,{recursive:true});
@@ -20,7 +20,9 @@ function zip(entries){const chunks=[],central=[];let offset=0;
  const directory=Buffer.concat(central),end=Buffer.alloc(22);end.writeUInt32LE(0x06054b50);end.writeUInt16LE(entries.length,8);end.writeUInt16LE(entries.length,10);end.writeUInt32LE(directory.length,12);end.writeUInt32LE(offset,16);return Buffer.concat([...chunks,directory,end]);
 }
 const results=[];
-for(const [kind,entries]of [['native',files],['submission',[...files,{name:'plugin.json',body:Buffer.from(JSON.stringify(portable,null,2)+'\n')}]]]){
+const packages=[['native',files]];
+if(args.includes('--submission'))packages.push(['submission',[...files,{name:'plugin.json',body:Buffer.from(JSON.stringify(portable,null,2)+'\n')}] ]);
+for(const [kind,entries]of packages){
  const name=`${meta.name}-v${meta.version}${kind==='native'?'':'-submission'}.zip`,body=zip(entries);fs.writeFileSync(path.join(out,name),body);results.push({kind,name,files:entries.length,bytes:body.length,sha256:crypto.createHash('sha256').update(body).digest('hex')});
 }
 fs.writeFileSync(path.join(out,`${meta.name}-v${meta.version}-SHA256SUMS.txt`),results.map(r=>r.sha256+'  '+r.name).join('\n')+'\n');console.log(JSON.stringify({version:meta.version,results},null,2));

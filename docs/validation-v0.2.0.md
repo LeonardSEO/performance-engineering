@@ -6,7 +6,7 @@ Date: 2026-10-24. This extends the [0.1.0 record](validation.md); previous measu
 
 The deterministic router recognizes lazy loading, Dutch optimization requests, HTTP validators, task scheduling and history restoration. Task prose outweighs incidental API names in attached code. Explicitly affected markup can route on bounded asset/readiness evidence, while a plain prose edit stays silent. Unknown shell effects are still not guessed.
 
-The [routing corpus](../evals/routing.json) contains 23 cases: 16 positive and seven negative. All intended selections/exclusions pass, including the two reproduced misses from 0.1.0. The corpus is finite and does not prove every natural-language formulation is understood.
+The [routing corpus](../evals/routing.json) contains 26 cases: 18 positive and eight negative. All intended selections/exclusions pass, including the two reproduced misses from 0.1.0. The corpus is finite and does not prove every natural-language formulation is understood.
 
 Nine skill domains remain. Five focused references add hero/offscreen/module recipes, HTTP revalidation, a durable mutation protocol, cooperative scheduling and privacy-preserving history restoration. Shared measurement guidance requires checking actual methods and facts before making claims.
 
@@ -22,7 +22,9 @@ These are hand-authored reference variants applying the documented rules. Their 
 - Actual HTTP tests enforce bodyless 304 revalidation, scoped compare-and-swap, concurrent tabs, client restart, missing/stale preconditions, idempotent retries, key misuse and response loss after commit.
 - A real Back navigation exercises bfcache; scope is changed in another tab, the private region was masked before the snapshot, and the visible result reflects revalidated scope. This bounded fixture does not prove every browser frame or production authentication system is safe.
 
-The optional manually dispatched browser CI workflow applies explicit synthetic budgets and retains results. A separate Lighthouse CI example supplies configurable warnings, without a remote upload service. Neither runs from plugin hooks.
+The optional manually dispatched browser CI workflow applies explicit synthetic budgets and retains results. A separate Lighthouse CI example supplies configurable warnings, without a remote upload service. Neither runs from plugin hooks. The [dispatched Linux browser workflow](https://github.com/LeonardSEO/performance-engineering/actions/runs/40134175084) passed the explicit budgets, actual history restoration and correctness guards; [its raw results](../validation/labs-ci-v0.2.0.json) are separate from the local figures.
+
+The Lighthouse CI example was also executed locally with `@lhci/cli@0.15.1`: three Chromium runs against the improved loading fixture completed and its configured assertions passed. No remote result upload was configured or performed. This verifies that the example runs; it does not replace application-specific budgets.
 
 ## Agent behavior
 
@@ -36,6 +38,8 @@ Residual limits remain: Claude calls hero placement probable before acknowledgin
 
 Real authenticated native compaction completed on macOS in Codex 0.163.0 and Claude Code 2.1.303. Both returned startup/router context and relevant asset guidance again after compaction. Codex's normal user-reviewed trust remained active. [Native results](../validation/native-compaction-v0.2.0.json) contain event summaries; raw host logs remain private.
 
-The native-loader CI matrix uses actual pinned Codex and Claude executables on Linux, macOS and Windows, installs/loads the package and checks native manifest/catalog validation. This is separate from live authenticated model/hook behavior: no credentials are exported to CI and no Codex trust receipt is fabricated. Cross-OS authenticated agent turns remain unverified.
+The universal installer and both explicit targets were exercised with `plugins@1.3.5` against the public repository. All three routes installed nine skills and the expected three events with the appropriate host adapter. [Installer inventory](../validation/installers-v0.2.0.json).
 
-The 45-process local hook benchmark measured 73.09 ms p95 on Node 26.8.1/macOS, including Node startup. [Raw summary](../validation/hook-benchmark-v0.2.0.json). Native/host scheduling is additional overhead. Runtime package dependencies remain zero; Playwright and Sharp are development-only lab dependencies.
+The [six-job CI run](https://github.com/LeonardSEO/performance-engineering/actions/runs/40134045173) passed all tests/builds and all native-loader jobs; [platform records](../validation/native-loaders-v0.2.0.json) preserve the versions and outcomes. The native-loader CI matrix uses actual pinned Codex and Claude executables on Linux, macOS and Windows, installs/loads the package and checks native manifest/catalog validation. This is separate from live authenticated model/hook behavior: no credentials are exported to CI and no Codex trust receipt is fabricated. Cross-OS authenticated agent turns remain unverified.
+
+The final 45-process local hook benchmark measured 83.15 ms p95 on Node 26.8.1/macOS, including Node startup. Empty Node controls measured 72.51 ms p95 as a separate diagnostic distribution. Earlier local hook runs measured 73.09 and 180.94 ms p95; [the history](../validation/hook-benchmark-v0.2.0-history.json) preserves the miss as well as the target-meeting runs. The 100 ms goal is therefore not guaranteed under every local condition. [Raw summary](../validation/hook-benchmark-v0.2.0.json). Native/host scheduling is additional overhead. Runtime package dependencies remain zero; Playwright and Sharp are development-only lab dependencies.

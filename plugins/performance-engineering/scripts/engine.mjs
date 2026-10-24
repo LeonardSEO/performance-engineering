@@ -98,7 +98,8 @@ export function routePrompt(prompt, stack = 'unknown') {
   // into a documentation-only task. The opening request owns that decision.
   const positiveIntent = prompt.split(/\n\s*\n/, 1)[0].replace(/\b(?:do not|don't|never|niet)\b[^.!?\n]*/gi, '');
   if (DOC_ONLY.test(positiveIntent) && !/\b(?:implement|code|fix (?:the )?(?:app|page|api)|application|runtime|profiler|implementeren)\b/i.test(positiveIntent)) return [];
-  if (!PERF.test(positiveIntent)) return [];
+  const taskProse = prompt.replace(/```[\s\S]*?```/g, '').split(/\n(?:FILE\s+\S+|diff --git\s)/, 1)[0].replace(/\b(?:do not|don't|never|niet)\b[^.!?\n]*/gi, '');
+  if (!PERF.test(taskProse)) return [];
   const scores = new Map();
   // Task prose outranks incidental API names in attached source. Code is only
   // supporting evidence; it cannot activate an unrelated documentation task.
@@ -115,8 +116,8 @@ export function routePrompt(prompt, stack = 'unknown') {
     hit(/main.thread|layout|paint|animation|motion|scroll|jank|dom\b|long task|rendering|scheduler\.yield|virtuali[sz]/i, 'rendering-performance', 35);
     hit(/\breact\b|next\.?js|hydration|suspense|server component|re.render|memoization/i, 'react-performance', 55);
   };
-  scoreText(positiveIntent, 4);
-  scoreText(prompt.slice(positiveIntent.length), 1);
+  scoreText(taskProse, 4);
+  scoreText(prompt, 1);
   if (stack === 'native') {
     add('react-native-performance', 80);
     scores.delete('rendering-performance'); scores.delete('react-performance'); scores.delete('asset-performance');

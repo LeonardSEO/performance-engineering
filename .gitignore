@@ -7,3 +7,5 @@ validation/private/
 labs/generated/
 playwright-report/
 test-results/
+
+.lighthouseci/

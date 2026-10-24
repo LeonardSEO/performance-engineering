@@ -1,0 +1,35 @@
+{
+  "workflow": "https://github.com/LeonardSEO/performance-engineering/actions/runs/40134045173",
+  "results": [
+    {
+      "platform": "win32",
+      "node": "v22.23.4",
+      "codex": "codex-cli 0.163.0",
+      "claude": "2.1.303 (Claude Code)",
+      "codexInstalledSkills": 9,
+      "claudeNativeValidation": true,
+      "claudeNativeInstallation": true,
+      "limits": "Native CLI loading/installation only. No authenticated model turn or Codex hook trust was bypassed. Cross-OS live-agent behavior remains a separate test."
+    },
+    {
+      "platform": "darwin",
+      "node": "v22.23.3",
+      "codex": "codex-cli 0.163.0",
+      "claude": "2.1.303 (Claude Code)",
+      "codexInstalledSkills": 9,
+      "claudeNativeValidation": true,
+      "claudeNativeInstallation": true,
+      "limits": "Native CLI loading/installation only. No authenticated model turn or Codex hook trust was bypassed. Cross-OS live-agent behavior remains a separate test."
+    },
+    {
+      "platform": "linux",
+      "node": "v22.23.3",
+      "codex": "codex-cli 0.163.0",
+      "claude": "2.1.303 (Claude Code)",
+      "codexInstalledSkills": 9,
+      "claudeNativeValidation": true,
+      "claudeNativeInstallation": true,
+      "limits": "Native CLI loading/installation only. No authenticated model turn or Codex hook trust was bypassed. Cross-OS live-agent behavior remains a separate test."
+    }
+  ]
+}
