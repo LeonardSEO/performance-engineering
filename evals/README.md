@@ -10,7 +10,7 @@ npm run eval:agents
 node scripts/evaluate-agents.mjs --hosts claude --cases react-native --rerun
 ```
 
-The runner creates a fresh OS temporary fixture directory per arm, requests no writes, enables read-only/plan behavior, and writes raw logs to git-ignored `validation/private/agent-evals`. It runs two child sessions concurrently, with a three-minute limit per session. Model settings are not overridden; compare paired arms within the same host. Codex needs the actual plugin installed for its plugin arm; it is enabled via a process-local config override. Claude uses `--plugin-dir` for its plugin arm.
+The runner creates a fresh OS temporary fixture directory per arm, requests no writes, enables read-only/plan behavior, and writes raw logs to git-ignored `validation/private/agent-evals`. It runs two child sessions concurrently, with a three-minute limit per session. Model settings are not overridden; compare paired arms within the same host. Codex needs the actual plugin installed for its plugin arm; it is enabled via a process-local config override. Keep the real user configuration loaded so user-reviewed hook trust remains effective; do not use `--ignore-user-config` or bypass trust. Existing other host plugins/hooks remain available equally in the paired Codex arms and are a stated experimental limitation. Claude uses `--plugin-dir` for its plugin arm.
 
 Expected review points are in cases.json and are not included in the agent prompts. A human/maintaining agent reviews the returned decisions against them; keyword presence alone does not establish correctness. The documentation-only case requires the exact corrected sentence and no audit.
 

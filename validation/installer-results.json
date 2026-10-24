@@ -1,0 +1,102 @@
+{
+  "installer": "plugins@1.3.5",
+  "source": "LeonardSEO/performance-engineering",
+  "node": "v26.8.1",
+  "method": "Node os.homedir shim for the Node installer, CLAUDE_CONFIG_DIR for child native Claude registration; actual HOME and CODEX_HOME untouched.",
+  "results": [
+    {
+      "target": "codex",
+      "exit": 0,
+      "inventories": {
+        "codex": {
+          "skills": [
+            "asset-performance",
+            "backend-performance",
+            "data-performance",
+            "doherty-threshold",
+            "performance-engineering",
+            "progressive-page-rendering",
+            "react-native-performance",
+            "react-performance",
+            "rendering-performance"
+          ],
+          "events": [
+            "SessionStart",
+            "UserPromptSubmit",
+            "PostToolUse"
+          ],
+          "adapter": "./hooks/codex.json"
+        }
+      }
+    },
+    {
+      "target": "claude-code",
+      "exit": 0,
+      "inventories": {
+        "claude-code": {
+          "skills": [
+            "asset-performance",
+            "backend-performance",
+            "data-performance",
+            "doherty-threshold",
+            "performance-engineering",
+            "progressive-page-rendering",
+            "react-native-performance",
+            "react-performance",
+            "rendering-performance"
+          ],
+          "events": [
+            "SessionStart",
+            "UserPromptSubmit",
+            "PostToolUse"
+          ],
+          "adapter": "./hooks/claude.json"
+        }
+      }
+    },
+    {
+      "target": "auto",
+      "exit": 0,
+      "inventories": {
+        "codex": {
+          "skills": [
+            "asset-performance",
+            "backend-performance",
+            "data-performance",
+            "doherty-threshold",
+            "performance-engineering",
+            "progressive-page-rendering",
+            "react-native-performance",
+            "react-performance",
+            "rendering-performance"
+          ],
+          "events": [
+            "SessionStart",
+            "UserPromptSubmit",
+            "PostToolUse"
+          ],
+          "adapter": "./hooks/codex.json"
+        },
+        "claude-code": {
+          "skills": [
+            "asset-performance",
+            "backend-performance",
+            "data-performance",
+            "doherty-threshold",
+            "performance-engineering",
+            "progressive-page-rendering",
+            "react-native-performance",
+            "react-performance",
+            "rendering-performance"
+          ],
+          "events": [
+            "SessionStart",
+            "UserPromptSubmit",
+            "PostToolUse"
+          ],
+          "adapter": "./hooks/claude.json"
+        }
+      }
+    }
+  ]
+}

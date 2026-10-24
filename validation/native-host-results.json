@@ -1,0 +1,21 @@
+{
+  "method": "Real authenticated local CLI sessions with user-reviewed Codex hook trust, no bypass. Each host writes one CSS file in a fresh disposable scratch project. The returned domain is observed in the model output; Claude debug logs also record validated PostToolUse JSON. Raw logs remain private.",
+  "results": {
+    "codex": {
+      "host": "codex",
+      "code": 0,
+      "fileWritten": true,
+      "expectedContent": true,
+      "receivedRenderingGuidance": true,
+      "text": "I\u2019ll create `style.css` with the exact content requested.\nrendering-performance\n"
+    },
+    "claude": {
+      "host": "claude",
+      "code": 0,
+      "fileWritten": true,
+      "expectedContent": true,
+      "receivedRenderingGuidance": true,
+      "text": "I created `style.css` containing exactly `.notice { opacity: 1; }`. After the write, a hook suggested one domain skill: **rendering-performance**."
+    }
+  }
+}

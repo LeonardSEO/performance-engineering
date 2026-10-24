@@ -1,0 +1,270 @@
+{
+  "date": "2026-10-24",
+  "kind": "paired static source reviews, not application benchmarks",
+  "runner": "scripts/evaluate-agents.mjs",
+  "method": {
+    "versions": {
+      "codex": "codex-cli 0.163.0",
+      "claude": "2.1.303 (Claude Code)"
+    },
+    "scenarios": [
+      "web-assets",
+      "data-backend",
+      "optimistic-writes",
+      "react-next",
+      "react-native",
+      "unrelated-docs"
+    ],
+    "arms": [
+      "baseline",
+      "plugin"
+    ],
+    "modelOverrides": false,
+    "fixtureIsolation": "Fresh OS temporary directory for every arm",
+    "limitations": "Codex uses its real user-level plugin cache and user-reviewed hook trust; existing host customizations and other enabled plugin hooks remain in both arms. Raw local logs are private; no application speed is measured by these static review tasks."
+  },
+  "successfulFinalSessions": 24,
+  "successfulEarlierDiagnosticSessions": 36,
+  "results": [
+    {
+      "host": "claude",
+      "version": "2.1.303 (Claude Code)",
+      "case": "data-backend",
+      "arm": "baseline",
+      "fixtureHash": "5ae860dc1e51538101bdbc77c2606db28b49e9e89abd676f682a63abd0aa91d7",
+      "model": [
+        "claude-opus-5-5"
+      ],
+      "text": "# Static review: dashboard API, request waterfall and tenant cache\n\nI only read the fixture text. I made no edits, ran nothing and didn't write a plan file.\n\n## Findings\n\n1. **Cross-tenant data leak (critical)** at `server/api.js`. The cache key is the fixed string `'dashboard'`. The first tenant's result is then served to every other tenant, so the `authorize()` check doesn't protect the data. Keep `authorize()` first. Key the cache by `tenant.id`, and also by role or permission scope if what users can see differs. Add a TTL or invalidation and a size limit, because the module-level `Map` grows without limit and isn't shared across instances.\n2. **N+1 queries in a serial loop.** The code awaits one `users.findUnique` per order row, one after another. Replace this with one `users.findMany({ where: { id: { in: distinctOwnerIds }, tenantId } })`, or a relation include. Keeping the tenant filter there preserves authorization. Also, the code mutates the row objects that later get cached.\n3. **Unbounded `orders.findMany`.** It has no pagination, `select` or limit. It probably needs an index on `orders.tenantId` (not verifiable here).\n4. **Waterfall** at `src/data.js`. `getPrimary` and `getOptional` both depend only on `scope`, so they can run together with `Promise.all`. If the optional data shouldn't fail the page, use `Promise.allSettled`.\n\n## How to diagnose\n- Log query count and per-query time for each request. Expect 1 + N queries that grow with the number of rows.\n- Add timing spans around `authorize`, `getAssignedTenant`, `getPrimary` and `getOptional` to confirm they run one after another.\n\n## How to verify a fix\n- **Tenant isolation:** request as tenant A, then as tenant B, and assert B never sees A's rows. Repeat after the cache is warm.\n- **Query count:** it stays fixed (about 2) whether there are 1 or 1,000 rows.\n- **Parallel loading:** with mocked 100 ms delays, `load()` takes about 100 ms instead of about 200 ms.\n- **Before and after:** compare p95 latency.\n\n## What I couldn't check\nI had no schema, indexes, query plans or metrics. The DB client looks Prisma-like but that's an assumption. I couldn't see the code for `authorize`, `getAssignedTenant`, `getPrimary` or `getOptional`. I also couldn't confirm whether users can belong to more than one tenant."
+    },
+    {
+      "host": "claude",
+      "version": "2.1.303 (Claude Code)",
+      "case": "data-backend",
+      "arm": "plugin",
+      "fixtureHash": "5ae860dc1e51538101bdbc77c2606db28b49e9e89abd676f682a63abd0aa91d7",
+      "model": [
+        "claude-opus-5-5"
+      ],
+      "text": "## Static review (fixture only)\n\n**1. Cross-tenant cache leak in `server/api.js` (fix this first; it's a correctness and security bug).** The cache key is the constant `'dashboard'`. After tenant A's request fills it, every other tenant gets A's orders back. `authorize` still runs, but the data it returns is no longer limited to the caller's tenant. The `Map` also has no size limit, no freshness window and no invalidation. Fix: key on `tenant.id` plus every other input that changes the response (filters, permissions), add a TTL and eviction, merge concurrent misses into one load, and invalidate when orders change. Or drop the cache until a freshness window is agreed.\n\n**2. N+1 queries.** The code makes one `users.findUnique` call per order, one after another. Replace this with a single batched lookup (`where:{id:{in:uniqueOwnerIds}}`) or the ORM's include/join. Keep it inside the authorized tenant scope, and add a stable order and a row limit to `findMany`.\n\n**3. Request waterfall in `src/data.js`.** `getAssignedTenant` has to finish first, because it sets the scope. `getPrimary` and `getOptional` both take only `scope`, so they look independent. If they are, run them together. If `b` really is optional, let it fail or arrive late without blocking `a`.\n\n**Diagnosis:** Trace the request and split the time into auth, pool wait, the orders query, the owner queries and serialization. Record query count per request, p50/p95 and error rates. Inspect the query plan for `orders.tenantId` before adding any index, on a non-production database.\n\n**Verify:** Run two tenants one after the other and check that neither sees the other's data, both cold and warm. Confirm query count drops from 1+N to 2. Compare latency on equivalent datasets and concurrency.\n\n**Evidence limits:** I reviewed the source statically and didn't run anything. `authorize`, the ORM, the data sizes and whether `getOptional` depends on `getPrimary` are all unknown. Following your no-file-changes instruction, I didn't write the plan file."
+    },
+    {
+      "host": "claude",
+      "version": "2.1.303 (Claude Code)",
+      "case": "optimistic-writes",
+      "arm": "baseline",
+      "fixtureHash": "7a40f991ae24b4abad71d06e489cd7d3ce04f20c59663d5ceedcf9df099e87ad",
+      "model": [
+        "claude-opus-5-5"
+      ],
+      "text": "# Review: `src/toggle.js` (static only)\n\nI didn't write a plan file or call ExitPlanMode because you asked me not to modify files or ask follow-up questions.\n\n**Problems found**\n\n1. **Saving can look successful when it failed.** `fetch` only rejects on network errors. A 4xx or 5xx response still runs `showSaved()` and never rolls back. `res.ok` needs to be checked.\n2. **A late failure can undo a newer toggle.** Each call captures its own `before`. Example: the user toggles true, false, then true. If the first request fails last, it resets `saved` to an older value and the UI no longer matches what the user chose.\n3. **Old responses update the UI.** Every response fires `showSaved()` after 200 ms, including ones for requests that a newer toggle has already replaced.\n4. **The server can store the wrong value.** Several POSTs can be in flight at once, and nothing stops the server applying them in a different order. The server can end up with an old value while the UI shows the newest one.\n5. **Smaller issues:** there's no `Content-Type` header, no timeout, and the starting value isn't loaded from the server.\n\n**Recommended approach**\n\n*UI response guards (what the user sees):*\n- Give each toggle a sequence number. Only the latest one may call `showSaved` or roll back.\n- Track `confirmed` (the last value the server accepted) separately from `desired` (the user's latest choice). On failure, roll back to `confirmed` and show an error, not a fake \"saved\".\n\n*Persisted write ordering (what the server stores):*\n- Keep at most one request in flight. While it's in flight, remember only the latest `desired` value. When it finishes, send that value if it differs from `confirmed`. Retry with backoff.\n- On the server, include a version number (or ETag/`If-Match`) and reject anything older than what it has already stored. Cancelling a request with AbortController doesn't stop the server applying it, so it can't be relied on for ordering.\n\n**Limits:** I only had this snippet. `render`/`showSaved` and the server's behaviour are unknown, and nothing was run or tested."
+    },
+    {
+      "host": "claude",
+      "version": "2.1.303 (Claude Code)",
+      "case": "optimistic-writes",
+      "arm": "plugin",
+      "fixtureHash": "7a40f991ae24b4abad71d06e489cd7d3ce04f20c59663d5ceedcf9df099e87ad",
+      "model": [
+        "claude-opus-5-5"
+      ],
+      "text": "**Static review of `src/toggle.js`** (I only read the source. Nothing was run, and the server behaviour is unknown.)\n\n**Bugs**\n1. **HTTP errors look like success.** `fetch` only rejects on network failure, so a 4xx or 5xx response still reaches the \"saved\" path. The code needs to check `res.ok`.\n2. **An old failure undoes a newer toggle.** The sequence is: toggle A (true), toggle B (false), then A fails. The `catch` sets `saved=before`, which is false. That happens to match B, but with three or more toggles the rollback overwrites the user's latest choice.\n3. **\"Saved\" can be wrong.** It fires 200 ms after *any* response, even an older one, while a newer save is still pending or has failed. The timer is never cancelled.\n4. **The server can end up with a stale value.** Two POSTs in flight can arrive or be applied in either order, so the server may finish on an older value. Response guards on the client can't fix this.\n5. There's no pending or \"not saved\" state, and `saved` is really the UI's intended value, not the persisted one.\n\n**Proposed approach**\n\n*UI response guards (client only):*\n- Keep `desired` (what's on screen) and `confirmed` (last value the server acknowledged) separately. Render `desired` immediately with no debounce.\n- Give each save a request ID (`seq`). Ignore any response whose `seq` isn't the latest.\n- On a failure for the latest request, roll back to `confirmed` and show \"Not saved \u2013 retry\". Never restore a captured `before` value.\n- Show \"Saved\" only when the latest request succeeds. Cancel any pending timer when a new toggle starts. Drop the artificial 200 ms delay.\n- Optionally, abort the previous request with `AbortController`. That saves bandwidth but doesn't guarantee the server ignored it.\n\n*Persisted write ordering (server):*\n- Send a version with each write: either `If-Match` with an ETag, or an increasing client `seq` stored per user. The server rejects (409) or ignores writes older than the current version.\n- Or serialize on the client: allow one request in flight and coalesce later toggles into a single follow-up that sends the latest `desired`.\n- PUT the absolute value, as the code already does, rather than \"flip\", so retries are safe to repeat.\n\n**Verify:** test failures, slow responses and out-of-order responses, rapid triple toggles, offline mode, and retry."
+    },
+    {
+      "host": "claude",
+      "version": "2.1.303 (Claude Code)",
+      "case": "react-native",
+      "arm": "baseline",
+      "fixtureHash": "8799e494876eebe727d3cf6a2cad208f7107eec975d01d4d6d1c443218b24c5e",
+      "model": [
+        "claude-opus-5-5"
+      ],
+      "text": "# Static review: Screen.tsx startup and scroll jank\n\n**How far the evidence goes:** The only report is a jank observation on a dev-build simulator. Dev mode adds runtime checks and runs unminified JS, and a simulator doesn't behave like a real device. So there's no baseline yet, and I won't predict any FPS or startup gains. The findings below come from reading the code only. Nothing was run or profiled.\n\n## Findings\n1. **The whole list renders at once.** `ScrollView` mounts every row up front, so mount cost and memory grow with `rows.length`. `@shopify/flash-list@2.0.0` is installed but not used.\n2. **Expensive work on every render.** `rows.map(expensiveCompute)` runs on the JS thread on every render, with no memoization. This likely blocks both first paint and scrolling.\n3. **The `interactive` mark is misleading.** It fires after the first commit, which with a full `ScrollView` means after all rows have mounted. It doesn't mean the screen is actually interactive. There is also no start mark to measure against.\n4. **Correctness:** `React` is used but never imported. `key={i}` uses the array index, which breaks row identity when the data changes.\n\n## Next diagnosis\n- Use a **release build on a real low-end device** (Hermes is the default in 0.81).\n- Record a baseline with React Native DevTools / React Profiler, plus the Perf Monitor or Android Studio / Xcode Instruments for frame drops on the UI and JS threads.\n- Add a start mark (e.g. at app entry or navigation) and a measure to `interactive`.\n- Time `expensiveCompute` per row and for the total, at realistic values of `rows.length`.\n\n## Candidate changes (each scoped and measured separately)\n- Import React and use stable keys (`row.id`).\n- Wrap the compute in `useMemo` keyed on `rows`. If it's still heavy, move it to the data layer or compute it lazily per visible row.\n- Replace `ScrollView` with `FlashList`, with a memoized `renderItem` and `keyExtractor`.\n- Redefine the `interactive` mark so it lines up with first visible content.\n\nCompare each change against the release baseline before keeping it."
+    },
+    {
+      "host": "claude",
+      "version": "2.1.303 (Claude Code)",
+      "case": "react-native",
+      "arm": "plugin",
+      "fixtureHash": "8799e494876eebe727d3cf6a2cad208f7107eec975d01d4d6d1c443218b24c5e",
+      "model": [
+        "claude-opus-5-5"
+      ],
+      "text": "**Static review (no measurements; I didn't run or change anything)**\n\n**What we can and can't conclude:** The only report comes from a development build on a simulator. Dev builds run extra checks and simulators don't behave like real phones, so this report can't tell us how fast the release app starts or scrolls. I have no numbers and claim no FPS or startup improvement.\n\n**What the code suggests (to confirm by profiling):**\n1. **Work before first render.** `rows.map(expensiveCompute)` runs on the JS thread on every render, before anything appears on screen. This is the most likely cause of slow startup and of re-render stalls.\n2. **Every row renders at once.** A `ScrollView` builds all rows up front. If `rows` is large, that costs startup time and memory. FlashList 2.0.0 is already installed but not used here.\n3. **The \"interactive\" mark is too early.** `performance.mark('interactive')` fires when the component mounts, not when the user can see and use the content. It isn't a valid startup endpoint.\n4. **Correctness:** `React` is used but never imported. Index keys (`key={i}`) are unstable if rows get reordered.\n\n**Next diagnosis:**\n- Build a release version and test on a representative physical device for each platform. Use the same cold-start conditions each time.\n- Record JS-thread and UI-thread frame behaviour separately during the same scroll gesture. Use React Native DevTools for JS, plus Perfetto or Android Studio on Android and Instruments on iOS.\n- Record how long `expensiveCompute` takes and how many rows there are.\n- Redefine \"interactive\" as the moment the first rows are visible and usable.\n\n**Scoped candidate changes (apply only if the profiles confirm them):**\n- Compute the values once per `rows` change with `useMemo`, or move the work off the render path or to the data source.\n- If the list is large, switch to `FlashList` v2 with stable keys from a `keyExtractor`. Don't use v1-only props such as `estimatedItemSize`.\n- Fix the missing import and move the interactive mark.\n\n**Verify:** Repeat the same interaction on the same release build and device, before and after. Compare startup time, JS and UI frame drops, memory and rendered output."
+    },
+    {
+      "host": "claude",
+      "version": "2.1.303 (Claude Code)",
+      "case": "react-next",
+      "arm": "baseline",
+      "fixtureHash": "fa5ec9a06d46c65358b560af6a9bfaa89df4696a9fd0ce59590d0d276eb9d623",
+      "model": [
+        "claude-opus-5-5"
+      ],
+      "text": "# Static review: `app/page.tsx` (Next 15.5.0, React 19.1.0)\n\n**1. Data leak between users (fix this first).** `let currentUser` is declared at module scope, and a module-level variable on the server is shared by every request. While one request is waiting on `getPrimary`, another can overwrite `currentUser`, so `Header` can show another user's name. The fix is to pass the user as a prop: `<Header name={user.name}/>`. If other components also need the user, wrap `auth` in React `cache()`. That cache lasts only for one request. Authentication itself stays the same.\n\n**2. Unnecessary waterfall.** `getOptional` waits for `getPrimary` to finish, even though both only need `user.id`. Start both calls right after `auth()`.\n\n**3. Loading boundaries.** Nothing renders until the optional data arrives. Await only `primary`, and pass the optional promise to a child wrapped in `<Suspense>`:\n```tsx\nconst user = await auth();\nconst primaryP = getPrimary(user.id), optionalP = getOptional(user.id);\nconst primary = await primaryP;\nreturn <><Header name={user.name}/>\n  <Dashboard primary={primary}>\n    <Suspense fallback={<OptionalSkeleton/>}><Optional data={optionalP}/></Suspense>\n  </Dashboard></>;\n```\nOptionally, add an `app/loading.tsx` to show something while `auth()` runs. Attach a `.catch` to `optionalP` so a failure there doesn't surface as an unhandled rejection.\n\n**4. Cache scope.** `auth()` most likely reads cookies, which makes this page dynamic. Don't put user-specific results in `unstable_cache` or a shared cache unless the user ID is part of the key. Per-request `cache()` is enough here. I'm not suggesting `\"use cache\"` or the compiler.\n\n**Evidence limits:** The fixture doesn't include the source for `auth`, `getPrimary`, `getOptional` or `Dashboard`, and there's no runtime trace. So I can't measure any speedup, confirm the calls are really independent, or tell whether `Dashboard` is a client component, which affects how you pass `optional`. This review is based only on reading the code. I didn't run anything or change any files."
+    },
+    {
+      "host": "claude",
+      "version": "2.1.303 (Claude Code)",
+      "case": "react-next",
+      "arm": "plugin",
+      "fixtureHash": "fa5ec9a06d46c65358b560af6a9bfaa89df4696a9fd0ce59590d0d276eb9d623",
+      "model": [
+        "claude-opus-5-5"
+      ],
+      "text": "# Static review: `app/page.tsx` (Next 15.5.0, React 19.1.0)\n\n**1. Shared user state across requests (fix this first).** `let currentUser` lives at module scope, so every request on the same server instance shares it. When two requests overlap, `Header` can render someone else's name. This is a data leak as well as a correctness bug. Pass the user down as a prop (`<Header user={user}/>`), or wrap `auth` in React `cache` so each request memoizes its own result. Keep `auth()` as the first step, because both data calls need `user.id`.\n\n**2. Request waterfall.** `getOptional` waits for `getPrimary` even though the code only shows it needing the user id. Start both after auth with `Promise.all`. Even better, don't block the page on the optional data at all (see 3).\n\n**3. Loading boundaries.** There's no `Suspense` boundary or `loading.tsx`, so nothing is sent until every await finishes. Render `Header` and the primary content first. Move the optional data into its own async Server Component that fetches it, and wrap that component in `<Suspense fallback={\u2026}>` so it streams in later. This means splitting `Dashboard`'s `optional` prop.\n\n**4. Cache scope.** This data belongs to one user, so don't put it in a shared or persistent cache. `use cache` is still experimental in 15.5, so don't add it. Next 15 doesn't cache `fetch` by default, which suits this page. React `cache` only lasts for a single request, so it's the right tool for removing repeated `auth`/user lookups within one render.\n\nNo memoization or compiler changes are needed.\n\n**What I couldn't check:**\n- There's no runtime trace, so I can't measure how much each fix saves.\n- The source of `auth`, `getPrimary`, `getOptional` and `Dashboard` isn't included. I couldn't confirm that the two data calls are independent, whether they use `fetch` or a database, or whether `Dashboard` is a client component (which would affect how much data is sent to the browser).\n\nAfter making the changes, test with concurrent logged-in users, direct navigation, and the streamed fallback.\n\nFollowing your instructions, I didn't change any files, including the plan file plan mode asked for. There was no spelling-only task in the fixture."
+    },
+    {
+      "host": "claude",
+      "version": "2.1.303 (Claude Code)",
+      "case": "unrelated-docs",
+      "arm": "baseline",
+      "fixtureHash": "48f521150d465065a44a3ff61b8865b3c11fe6c58736a5a9a0fa90bd174e8aeb",
+      "model": [
+        "claude-opus-5-5"
+      ],
+      "text": "This project has a professional README."
+    },
+    {
+      "host": "claude",
+      "version": "2.1.303 (Claude Code)",
+      "case": "unrelated-docs",
+      "arm": "plugin",
+      "fixtureHash": "48f521150d465065a44a3ff61b8865b3c11fe6c58736a5a9a0fa90bd174e8aeb",
+      "model": [
+        "claude-opus-5-5"
+      ],
+      "text": "This project has a professional README."
+    },
+    {
+      "host": "claude",
+      "version": "2.1.303 (Claude Code)",
+      "case": "web-assets",
+      "arm": "baseline",
+      "fixtureHash": "a79a84273621b5dc1da8ebae79d57d79b9e4b474842032ff7b704ba9f528f224",
+      "model": [
+        "claude-opus-5-5"
+      ],
+      "text": "I couldn't write a plan file or call ExitPlanMode because neither tool is available in this session, so the review is below.\n\n**Static review. No trace was available, so these findings come from the source alone. File sizes are guessed from file names, and I can't tell whether this page uses the editor.**\n\n1. **A 4 MB script blocks rendering** (`index.html`, `<head>`). `vendor-editor-4mb.js` is a normal script in the head, so the browser must download and run it before it shows anything. A dashboard probably doesn't need an editor on first load. `all-pages.css` also blocks rendering, but that matters less.\n   *Fix:* Take the script out of this page and load it with `import()` only when the editor is opened. If it really is needed at startup, use `defer`.\n\n2. **The main content waits for the optional reports, then the whole page is replaced** (`app.js`). `Promise.all` waits for `/optional-reports` before showing `/primary`. If the reports request fails, nothing renders. Setting `body.innerHTML` then throws away the header and hero image and makes the browser parse and lay out the page again.\n   *Fix:* Put `/primary` into `#content` as soon as it arrives. Load the reports into their own container, with their own error handling. Check `response.ok`.\n\n3. **The main visible image loads late** (`<img>`). A 5000px image above the fold has `loading='lazy'` and no width or height. This likely makes it the slowest element to appear and lets the layout jump when it loads.\n   *Fix:* Remove `lazy` and add `fetchpriority=\"high\"`, `width` and `height`. Use `srcset`/`sizes` to serve resized versions, for example 800, 1600 and 2400px.\n\n**How to verify:** Run Lighthouse or WebPageTest before and after, several times on throttled mobile, and compare when the main content appears (FCP/LCP), how long the page is blocked (TBT) and layout shift (CLS). In the network panel, check that the editor script isn't requested on load. Slow down or fail `/optional-reports` on purpose and confirm the main content still shows and the header stays in place. Check that the browser picks a hero image no wider than the viewport needs."
+    },
+    {
+      "host": "claude",
+      "version": "2.1.303 (Claude Code)",
+      "case": "web-assets",
+      "arm": "plugin",
+      "fixtureHash": "a79a84273621b5dc1da8ebae79d57d79b9e4b474842032ff7b704ba9f528f224",
+      "model": [
+        "claude-opus-5-5"
+      ],
+      "text": "I read the `asset-performance` and `data-performance` skill files. I didn't write a plan file because you asked for no file changes.\n\n## Static review: top 3 issues\n\nThese come from reading the source only, with no trace. Filenames like \"4mb\" and \"5000px\" are just labels, so the actual sizes, which element is the LCP and what's above the fold are guesses until measured.\n\n**1. A heavy editor script blocks the first paint** (`index.html`, `<head>`)\n`/vendor-editor-4mb.js` is a plain script tag in the head, so the browser must download and run it before it can render anything. Nothing in `app.js` uses an editor.\n- **Fix:** First confirm nothing on this page needs it at load. Then load it only when the user opens the editor, or at least add `defer`. Check separately how much of `all-pages.css` this page actually needs.\n\n**2. Optional reports hold up the main content, then wipe the page** (`app.js`)\n- `Promise.all` waits for `/optional-reports` before showing `/primary`.\n- If either request fails, nothing renders, and there's no error handling.\n- `document.body.innerHTML = \u2026` replaces the whole body, including the header and hero image. That destroys the likely LCP element and causes layout shift.\n- **Fix:** Render `/primary` into `#content` as soon as it arrives. Render the reports into their own container, with their own failure state. Check `res.ok` on both. Keep the same trust level for the inserted HTML; don't widen it.\n\n**3. The hero image is lazy-loaded and has no size** (`<img loading='lazy'>`)\nIf it's above the fold, lazy loading delays the LCP, and the missing width and height cause layout shift.\n- **Fix:** If it's the LCP, remove `loading='lazy'`, add `width`/`height`, provide right-sized sources with `srcset`/`sizes`, and consider `fetchpriority=\"high\"`.\n\n## How to verify\nCompare cold and warm loads before and after, on the same throttled device profile, run several times each:\n- LCP element and time, CLS, long tasks, and the network waterfall (render-blocking time, bytes transferred).\n- Delay and fail `/optional-reports`: primary content should still render on time and the header and hero should stay.\n- Confirm the editor still works when someone actually opens it."
+    },
+    {
+      "host": "codex",
+      "version": "codex-cli 0.163.0",
+      "case": "data-backend",
+      "arm": "baseline",
+      "fixtureHash": "5ae860dc1e51538101bdbc77c2606db28b49e9e89abd676f682a63abd0aa91d7",
+      "model": null,
+      "text": "The main risks are cross-tenant cache reuse and sequential database requests.\n\n- **Tenant cache isolation \u2014 critical:** `server/api.js` authorizes each request, but every tenant shares the `'dashboard'` cache key. After the first cache fill, another authorized tenant can receive those cached rows. Preserve authorization before cache access; key entries by tenant and any permission scope affecting visibility. Define expiry and invalidation, and avoid sharing mutable response objects.\n- **Owner lookup authorization:** Orders are tenant-filtered, but owners are fetched using only `id`. Whether this exposes unauthorized users depends on the schema and access rules. Any batching or join must preserve the required tenant and user visibility constraints.\n- **Database waterfall:** For N orders, the handler awaits one orders query followed by N sequential owner queries, including repeated lookups for shared owners. Prefer an authorized relation query or a tenant-scoped batch over distinct owner IDs. Select required fields and bound the order result size.\n- **Client waterfall:** In `src/data.js`, both requests receive the resolved `scope`. If they are independent, start them concurrently after `getAssignedTenant()` completes. Explicitly decide whether optional-request failure should prevent primary data from rendering.\n\nTargeted verification: compare cold and warm requests across two tenants and permission scopes; test unauthorized requests against a warm cache, invalidation, and owner visibility. Measure query count, distinct owners, result size, and per-query duration. Test request overlap and optional-failure behavior.\n\nEvidence limits: static review of the supplied snippets only. No files changed, commands executed, services contacted, or database run; schema, indexes, query plans, timings, and dependency semantics remain unverified."
+    },
+    {
+      "host": "codex",
+      "version": "codex-cli 0.163.0",
+      "case": "data-backend",
+      "arm": "plugin",
+      "fixtureHash": "5ae860dc1e51538101bdbc77c2606db28b49e9e89abd676f682a63abd0aa91d7",
+      "model": null,
+      "text": "I\u2019ll use the performance, backend, and data guidance for a static review, focusing on tenant isolation, query count, and request ordering.\n- **Critical tenant isolation issue \u2014 `server/api.js`:** Authorization runs before cache lookup, but every tenant shares the `'dashboard'` key. Once populated, another authorized tenant receives the cached tenant\u2019s rows. Keep authorization first; key cached results by authorized tenant and any additional visibility scope. Define expiration, write invalidation, and bounded capacity.\n\n- **Sequential N+1 queries \u2014 `server/api.js`:** A cache miss performs one orders lookup followed by one awaited owner lookup per row: **1 + N database calls**. Prefer a tenant-safe relation query or batched lookup of distinct owner IDs. Owner lookup uses only `id`; verify tenant membership or the applicable visibility rule explicitly. Avoid replacing the loop with unbounded parallel queries. Consider pagination and selecting only needed fields.\n\n- **Request waterfall \u2014 `src/data.js`:** Tenant assignment is a necessary prerequisite. After it resolves, primary and optional reads execute sequentially despite no visible dependency between them. If independent, start both then; handle optional failure separately if partial results are valid. Whether optional data delays rendering depends on the caller.\n\nSuggested verification: instrument authorization, cache lookup, pool wait, individual queries, serialization, and client request timing. Compare equivalent tenant sizes and concurrency with cold/warm caches; inspect query plans before proposing indexes. Test alternating tenants, differing permissions, duplicate owners, concurrent misses, write invalidation, tenant switches, and optional-read failure.\n\n**Evidence limits:** Static source establishes these patterns, but cannot establish actual latency, query plans, schema guarantees, or rendering behavior.\n\n**Changed files:** None. **Verification run:** Static review only. **Remaining risk:** Cross-tenant cache disclosure and unverified owner visibility."
+    },
+    {
+      "host": "codex",
+      "version": "codex-cli 0.163.0",
+      "case": "optimistic-writes",
+      "arm": "baseline",
+      "fixtureHash": "7a40f991ae24b4abad71d06e489cd7d3ce04f20c59663d5ceedcf9df099e87ad",
+      "model": null,
+      "text": "The toggle renders immediately, providing optimistic feedback, but save handling is unreliable.\n\n- `fetch` resolves on HTTP errors; without checking `response.ok`, rejected saves can show \u201cSaved.\u201d\n- An older failed request restores its captured `before`, overwriting newer user intent.\n- Delayed \u201cSaved\u201d callbacks can fire while another save is pending or after it fails.\n- Concurrent requests can persist out of order, leaving the server opposite to the displayed value.\n\nA reliable approach:\n\n1. Track **desired value**, **confirmed value**, and a monotonically increasing **intent revision**. Render each toggle immediately and show a quiet pending indicator.\n2. Use one background save at a time, coalescing further toggles into the latest desired value. After a successful response, record the acknowledged value and save again if desired differs.\n3. Check HTTP status. On failure, preserve the latest desired value, display an unsaved state, and offer retry. If rollback is required, apply it only when the failed operation still represents the current intent.\n4. Show \u201cSaved\u201d only when the current intent is acknowledged and nothing remains pending. Cancel or revision-guard delayed notifications.\n\n**UI guards do not order persisted writes.** Ignoring stale responses prevents stale rendering; it cannot stop an older request overwriting newer server data. Serialization helps within one client, but timeouts can leave server work running. For robust persistence, use server-enforced atomic revisions or conditional writes, with conflict handling and idempotent retries.\n\nEvidence limits: this is a static review of the supplied fixture. Backend ordering, response contracts, and rendering behavior are unknown; nothing was executed or modified."
+    },
+    {
+      "host": "codex",
+      "version": "codex-cli 0.163.0",
+      "case": "optimistic-writes",
+      "arm": "plugin",
+      "fixtureHash": "7a40f991ae24b4abad71d06e489cd7d3ce04f20c59663d5ceedcf9df099e87ad",
+      "model": null,
+      "text": "I\u2019ll use the performance and interaction feedback guidance for a static review of the supplied fixture, without changing files or contacting services.\nThe toggle updates optimistically before awaiting the save, but its recovery and completion feedback are unsafe.\n\n- **Stale rollback:** an older request\u2019s failure restores its captured `before`, potentially undoing newer intent. That snapshot is not necessarily the last confirmed server value.\n- **False success:** `fetch` resolves on HTTP errors; check `response.ok` and the endpoint\u2019s application-level result.\n- **Misleading feedback:** the extra 200 ms delays confirmation, and its unguarded timer can announce \u201cSaved\u201d after another toggle or failure.\n- **Persisted races:** concurrent writes can leave the server holding an older selection, even if the UI ignores stale responses.\n\nKeep separate `desiredValue`, confirmed server value/revision, and a local intent generation. Render every toggle immediately and expose honest Saving/Saved/Not saved status. Capture each request\u2019s value and generation. Guard completion, rollback, and timer callbacks against superseded intent; preferably preserve failed intent as an unsaved value with retry. Show Saved only when the latest intent is confirmed, without the artificial delay.\n\n**UI guards do not order persisted writes.** Use a server-enforced revision protocol: atomically accept a write only against its expected revision and return the authoritative value/revision. On conflict or an ambiguous network failure, reconcile and retry the latest intent. Serialize/coalesce this control\u2019s pending writes to reduce conflicts. Aborting a request does not prove its server write stopped.\n\nFiles changed: none. Verification: static inspection only; no tests or service calls. The fixture declares no React/Next.js dependencies. Render cost, latency, execution scope of module state, and backend guarantees remain unverified."
+    },
+    {
+      "host": "codex",
+      "version": "codex-cli 0.163.0",
+      "case": "react-native",
+      "arm": "baseline",
+      "fixtureHash": "8799e494876eebe727d3cf6a2cad208f7107eec975d01d4d6d1c443218b24c5e",
+      "model": null,
+      "text": "The fixture shows two plausible sources of jank, but a development-build simulator observation cannot establish release-device performance or quantify improvements.\n\n- **Startup/render work:** `rows.map(expensiveCompute)` runs synchronously for every row on every render. This may delay rendering and occupy the JavaScript thread. Its actual cost is unmeasured.\n- **Scrolling:** `ScrollView` mounts every `Text`. Large datasets can increase mounting, layout, and memory costs. The fixture provides no row count or trace proving this is the bottleneck.\n- **Measurement:** The effect\u2019s `interactive` mark records effect execution after a commit; it does not establish visible readiness, responsiveness, or elapsed startup time.\n- **Correctness:** `React.useEffect` needs a `React` binding, which the supplied file lacks. `expensiveCompute` is also undefined in the supplied source. Index keys can cause incorrect row identity when items reorder.\n\nNext diagnosis: reproduce on a physical device using a release or profiling build, with representative data. Measure cold and warm startup separately; trace computation, React rendering, mounting/layout, and JavaScript versus UI-thread stalls during scrolling.\n\nScoped candidates to evaluate individually:\n\n1. Replace `ScrollView` with a virtualized list, using stable row IDs. The installed FlashList is a candidate after checking its setup requirements.\n2. Move computation into virtualized row rendering; precomputing every value would retain the eager cost.\n3. Memoize expensive results where input stability and invalidation are understood; memoization still pays the initial computation cost.\n\nFiles changed: none. Verification: static inspection only. Remaining uncertainty: the actual bottleneck and benefit of each candidate."
+    },
+    {
+      "host": "codex",
+      "version": "codex-cli 0.163.0",
+      "case": "react-native",
+      "arm": "plugin",
+      "fixtureHash": "8799e494876eebe727d3cf6a2cad208f7107eec975d01d4d6d1c443218b24c5e",
+      "model": null,
+      "text": "I\u2019ll use the performance-engineering and React Native guidance for a static review, keeping candidate changes separate from measured results.\nThe fixture suggests two performance hypotheses, but a development-build simulator observation cannot establish release-device startup time, FPS, or the dominant bottleneck.\n\n- **Synchronous computation:** `rows.map(expensiveCompute)` runs during every render, before content can commit. Its cost depends on row count and the computation; neither is supplied.\n- **Eager rendering:** `ScrollView` renders every row. For a large dataset, mounting and laying out all those views could affect startup, memory, and scrolling.\n- **Misleading startup marker:** The mount effect\u2019s `interactive` mark does not establish that meaningful content is visible and usable. There is also no launch-start marker here.\n- **Correctness:** `React.useEffect` needs a `React` binding, which this complete fixture does not import. Index keys can misidentify rows when items are inserted, removed, or reordered.\n\nNext diagnosis: profile a representative physical device with a release build. Separate cold launches from warm launches; measure launch-to-visible, usable content. Capture JS execution and native UI frame behavior separately during startup and a repeatable scroll. Attribute time to computation, React rendering, and native layout/drawing.\n\nScoped candidates, conditional on those findings:\n\n- For a confirmed large-list problem, use virtualization with stable row IDs. The supplied FlashList version is **2.0.0**: verify architecture compatibility and use v2 configuration, avoiding v1-only sizing props.\n- Virtualization alone leaves the eager computation intact. If computation dominates, calculate only needed rows or cache results with correct invalidation. Add memoization only when profiling shows repeated work with reusable inputs.\n\nChanged files: none. Verification: static source review only. Remaining uncertainty: runtime, architecture, dataset size, computation cost, and release-device behavior."
+    },
+    {
+      "host": "codex",
+      "version": "codex-cli 0.163.0",
+      "case": "react-next",
+      "arm": "baseline",
+      "fixtureHash": "fa5ec9a06d46c65358b560af6a9bfaa89df4696a9fd0ce59590d0d276eb9d623",
+      "model": null,
+      "text": "The fixture shows two issues directly:\n\n- **Cross-request user state:** `currentUser` lives at module scope. Concurrent requests can overwrite it, potentially causing `Header` to display another user\u2019s name. Keep authentication inside `Page`, store the user in a local variable, and pass the name to `Header` explicitly.\n- **Serial fetching:** The execution order is `auth \u2192 getPrimary \u2192 getOptional \u2192 render`. If the two data calls are independent, start both after authentication and await them concurrently. Keep authentication first because both calls require the authenticated user ID.\n\n**Loading boundaries:** Both awaits currently block the entire returned tree, including the header. To reveal primary content while optional content loads, move the optional await into an async Server Component beneath its own `<Suspense>` boundary, with a useful fallback. Start optional fetching early after authentication. Merely wrapping already-resolved `optional` props in Suspense would not change this waterfall. A route-level `loading.tsx` provides a broader fallback; it does not independently reveal optional content.\n\n**Cache scope:** With Next.js 15.5.0 and React 19.1.0, distinguish request deduplication from persistent caching. React `cache()` can deduplicate supported server work within a request; it is not a persistent user-data cache. Next.js 15 does not cache `fetch` requests by default. Inspect the data helpers before adding caching; any persistent personalized cache needs appropriate user/tenant keys and authorization checks.\n\n**Evidence limits:** The helpers, layout, and runtime trace are absent. Independence, actual cache behavior, bottleneck magnitude, and performance gains remain unverified. No files changed or commands run."
+    },
+    {
+      "host": "codex",
+      "version": "codex-cli 0.163.0",
+      "case": "react-next",
+      "arm": "plugin",
+      "fixtureHash": "fa5ec9a06d46c65358b560af6a9bfaa89df4696a9fd0ce59590d0d276eb9d623",
+      "model": null,
+      "text": "I\u2019ll use the performance skills to review the supplied code statically, keeping conclusions limited to what it shows.\nStatic review of **Next.js 15.5.0 / React DOM 19.1.0**, using the App Router fixture:\n\n- **Critical correctness issue:** module-level `currentUser` is shared across server requests. Concurrent requests can overwrite it during awaits, causing subsequent reads or `Header` to use another user\u2019s identity. Use request-local `const user = await auth()` and pass `user` explicitly. Preserve authentication and authorization before scoped reads.\n\n- **Waterfall:** the source schedules `auth \u2192 primary \u2192 optional`. Both reads take only the user ID, so they appear independent after authentication; confirm their implementations before parallelizing. Start both after the identity/access gate. Awaiting both through `Promise.all` would shorten serial waiting but still make optional data block primary content.\n\n- **Loading boundaries:** this page returns neither header nor dashboard until both reads finish. Render the authorized header immediately, then use independently suspended async Server Component regions for primary and optional content. Await each read inside its corresponding boundary; wrapping already-awaited results cannot stream them earlier. Give optional content a stable skeleton and local error/retry handling.\n\n- **Cache scope:** no cache implementation is supplied. React `cache` can deduplicate supported Server Component work within a request; it is not persistent user isolation. Any persistent cache needs explicit user/tenant/permission keys, freshness and invalidation. Do not cache mutable identity globally or assume newer Next.js cache behavior applies.\n\n**Evidence limits:** static scheduling and shared-state hazards are visible; latency, cache hits, hydration, render, layout and paint costs are unmeasured. No memoization or compiler migration is justified.\n\nChanged files: none. Verification: source review only; runtime validation remains pending."
+    },
+    {
+      "host": "codex",
+      "version": "codex-cli 0.163.0",
+      "case": "unrelated-docs",
+      "arm": "baseline",
+      "fixtureHash": "48f521150d465065a44a3ff61b8865b3c11fe6c58736a5a9a0fa90bd174e8aeb",
+      "model": null,
+      "text": "This project has a professional README."
+    },
+    {
+      "host": "codex",
+      "version": "codex-cli 0.163.0",
+      "case": "unrelated-docs",
+      "arm": "plugin",
+      "fixtureHash": "48f521150d465065a44a3ff61b8865b3c11fe6c58736a5a9a0fa90bd174e8aeb",
+      "model": null,
+      "text": "This project has a professional README."
+    },
+    {
+      "host": "codex",
+      "version": "codex-cli 0.163.0",
+      "case": "web-assets",
+      "arm": "baseline",
+      "fixtureHash": "a79a84273621b5dc1da8ebae79d57d79b9e4b474842032ff7b704ba9f528f224",
+      "model": null,
+      "text": "Static review only: no timing trace, asset contents, measured sizes, image dimensions, or endpoint behavior are available. Priorities are provisional; filenames suggest sizes but do not prove them.\n\n1. **Primary content depends on optional reports.** `Promise.all` waits for both fetches before rendering anything. A slow optional response delays primary content; either fetch rejecting prevents rendering entirely. HTTP error statuses are also unchecked. Replacing `document.body.innerHTML` removes the header, hero, and content container, causing avoidable layout and DOM disruption.\n   **Scoped fix:** Render primary content into `#content` as soon as ready. Load reports independently into a separate container, with status checks and independent error handling.\n   **Verify:** Delay or fail `/optional-reports`; primary content should still appear promptly and the page shell should remain intact. Test primary failure separately.\n\n2. **The editor script blocks HTML parsing.** The synchronous script in `<head>` must download and execute before the browser parses the body. If large or expensive, it can delay visible content and occupy the main thread. The stylesheet also blocks rendering, though its cost is unknown.\n   **Scoped fix:** Use `defer` if execution order permits; load the editor on demand if unnecessary initially. Investigate CSS coverage before reducing it.\n   **Verify:** Compare first contentful paint, script execution time, and interaction latency under constrained network/CPU conditions.\n\n3. **The hero risks late loading and layout shift.** A likely above-fold image is lazy-loaded and has no reserved dimensions.\n   **Scoped fix:** If initially visible, remove lazy loading; supply appropriate responsive sources and explicit dimensions.\n   **Verify:** Check image request timing, transferred bytes, LCP, and layout shifts."
+    },
+    {
+      "host": "codex",
+      "version": "codex-cli 0.163.0",
+      "case": "web-assets",
+      "arm": "plugin",
+      "fixtureHash": "a79a84273621b5dc1da8ebae79d57d79b9e4b474842032ff7b704ba9f528f224",
+      "model": null,
+      "text": "I\u2019ll use the performance engineering guidance for a source-only review and keep the findings scoped to the supplied page.\nStatic priorities; actual impact remains unmeasured.\n\n1. **Primary content waits for optional reports (`app.js`).** Both requests start concurrently, but `Promise.all` and the combined body reads delay rendering until both complete. Either network rejection prevents rendering; HTTP error statuses are unchecked. **Fix:** render primary content as soon as its body is ready, load reports into a separate region, and provide independent status checks, errors and retries. Preserve any required authorization dependencies. **Verify:** delay or fail reports and confirm primary content still appears and works; test HTTP errors and retries.\n\n2. **Rendering replaces the entire page (`app.js`).** `document.body.innerHTML` removes the header, hero and content container, discarding their DOM state and attached listeners. Depending on response size, parsing and layout could also interrupt interactions. **Fix:** update dedicated content regions while retaining the page shell and focused controls. **Verify:** focus and event handlers survive report completion; profile DOM-update duration, long tasks and layout shifts with representative responses.\n\n3. **Initial resource loading has avoidable blocking candidates (`index.html`).** The synchronous head script blocks parsing before the stylesheet and body are discovered; CSS blocks rendering. The lazy image could load late if it is the visible LCP element. **Fix:** defer scripts in dependency order after checking initialization requirements; load the editor on demand if optional. If the hero is above-fold, remove lazy loading and reserve its geometry. **Verify:** compare equivalent cold/warm waterfalls, LCP, CLS and interaction timing.\n\nNo files changed or runtime checks performed. Filenames establish neither sizes nor dimensions; asset contents, visibility and measured responsiveness remain unknown."
+    }
+  ]
+}

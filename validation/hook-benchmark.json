@@ -1,0 +1,10 @@
+{
+  "node": "v26.8.1",
+  "platform": "darwin",
+  "samples": 45,
+  "includesProcessStartup": true,
+  "medianMs": 66.138916,
+  "p95Ms": 74.986042,
+  "maxMs": 93.962917,
+  "targetP95Ms": 100
+}

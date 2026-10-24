@@ -158,7 +158,7 @@ npm run bench:hooks
 
 `plugin.meta.json` is the single source for identity/version metadata. Generation produces native compatibility manifests, a separate portable export manifest, host hook adapters, and both marketplace catalogs. The CI matrix runs Node 22 on Linux, macOS and Windows.
 
-The [validation report](docs/validation.md) distinguishes deterministic tests, native loader/installation checks, agent behavior evaluations and unverified conditions. Agent evals use existing authenticated CLIs, run only when explicitly requested with `npm run eval:agents`, and are not part of normal hooks or CI. See [evaluation methodology](evals/README.md).
+The [validation report](docs/validation.md) distinguishes deterministic tests, native loader/installation checks, agent behavior evaluations and unverified conditions. Agent evals use existing authenticated CLIs, run only when explicitly requested with `npm run eval:agents`, and are not part of normal hooks or CI. See [evaluation methodology](evals/README.md). Native CLI and isolated installer smoke-test commands are documented in the validation report.
 
 ## License and acknowledgments
 
