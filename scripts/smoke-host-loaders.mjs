@@ -3,6 +3,7 @@ import fs from 'node:fs';import os from 'node:os';import path from 'node:path';
 import {spawnSync} from 'node:child_process';import assert from 'node:assert/strict';import {fileURLToPath} from 'node:url';
 const repo=fileURLToPath(new URL('../',import.meta.url)),modules=path.resolve(process.argv[2]??'validation/private/host-clis/node_modules');
 const plugin=path.join(repo,'plugins/performance-engineering');
+const expected=JSON.parse(fs.readFileSync(path.join(repo,'plugin.meta.json')));
 const temp=fs.mkdtempSync(path.join(os.tmpdir(),'performance-loaders-'));
 function cli(pkg,bin,args,env=process.env){
  const root=path.join(modules,...pkg.split('/')),meta=JSON.parse(fs.readFileSync(path.join(root,'package.json')));
@@ -15,7 +16,7 @@ try{
  const version=cli('@openai/codex','codex',['--version']).trim();
  const install=JSON.parse(cli('@openai/codex','codex',['plugin','add','performance-engineering@performance-engineering','--json','-c','marketplaces.performance-engineering.source_type="local"','-c','marketplaces.performance-engineering.source='+JSON.stringify(repo)]));
  const skills=fs.readdirSync(path.join(install.installedPath,'skills'));assert.equal(skills.length,9);
- const codexManifest=JSON.parse(fs.readFileSync(path.join(install.installedPath,'.codex-plugin/plugin.json')));assert.equal(codexManifest.version,'0.2.0');
+ const codexManifest=JSON.parse(fs.readFileSync(path.join(install.installedPath,'.codex-plugin/plugin.json')));assert.equal(codexManifest.version,expected.version);
  const claudeEnv={...process.env,CLAUDE_CONFIG_DIR:path.join(temp,'claude')};
  const claudeVersion=cli('@anthropic-ai/claude-code','claude',['--version'],claudeEnv).trim();
  cli('@anthropic-ai/claude-code','claude',['plugin','validate',plugin],claudeEnv);
