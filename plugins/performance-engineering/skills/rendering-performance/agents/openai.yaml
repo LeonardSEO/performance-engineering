@@ -1,0 +1,4 @@
+interface:
+  display_name: "Rendering Performance"
+  short_description: "Profile web frames, layout, motion, and memory"
+  default_prompt: "Use $rendering-performance to diagnose and improve the relevant behavior, preserve correctness, and report verification evidence."

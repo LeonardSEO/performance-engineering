@@ -1,0 +1,4 @@
+interface:
+  display_name: "Progressive Page Rendering"
+  short_description: "Reveal useful pages in independent stages"
+  default_prompt: "Use $progressive-page-rendering to diagnose and improve the relevant behavior, preserve correctness, and report verification evidence."

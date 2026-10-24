@@ -1,0 +1,4 @@
+interface:
+  display_name: "Backend Performance"
+  short_description: "Trace server, query, pool, and cache latency"
+  default_prompt: "Use $backend-performance to diagnose and improve the relevant behavior, preserve correctness, and report verification evidence."

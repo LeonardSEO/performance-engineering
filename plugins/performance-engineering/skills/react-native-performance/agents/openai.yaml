@@ -1,0 +1,4 @@
+interface:
+  display_name: "React Native Performance"
+  short_description: "Profile native startup, frames, and memory"
+  default_prompt: "Use $react-native-performance to diagnose and improve the relevant behavior, preserve correctness, and report verification evidence."

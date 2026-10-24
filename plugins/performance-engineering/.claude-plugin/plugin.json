@@ -1,0 +1,12 @@
+{
+  "name": "performance-engineering",
+  "version": "0.1.0",
+  "description": "Nine focused skills and advisory hooks for evidence-led web, fullstack, React and React Native performance engineering.",
+  "author": {
+    "name": "LeonardSEO"
+  },
+  "repository": "https://github.com/LeonardSEO/performance-engineering",
+  "homepage": "https://github.com/LeonardSEO/performance-engineering",
+  "license": "MIT",
+  "hooks": "./hooks/claude.json"
+}

@@ -1,0 +1,22 @@
+{
+  "name": "performance-engineering",
+  "version": "0.1.0",
+  "description": "Nine focused skills and advisory hooks for evidence-led web, fullstack, React and React Native performance engineering.",
+  "author": {
+    "name": "LeonardSEO"
+  },
+  "repository": "https://github.com/LeonardSEO/performance-engineering",
+  "homepage": "https://github.com/LeonardSEO/performance-engineering",
+  "license": "MIT",
+  "skills": "./skills/",
+  "hooks": "./hooks/codex.json",
+  "interface": {
+    "displayName": "Performance Engineering",
+    "shortDescription": "Evidence-led performance",
+    "longDescription": "Nine focused skills and advisory hooks for evidence-led web, fullstack, React and React Native performance engineering.",
+    "developerName": "LeonardSEO",
+    "category": "Developer Tools",
+    "capabilities": [],
+    "defaultPrompt": "Diagnose the bottleneck, select relevant skills, preserve correctness, and compare equivalent measurements."
+  }
+}

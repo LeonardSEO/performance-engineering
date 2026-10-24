@@ -1,0 +1,4 @@
+interface:
+  display_name: "Data Performance"
+  short_description: "Fast, scoped, race-safe data loading"
+  default_prompt: "Use $data-performance to diagnose and improve the relevant behavior, preserve correctness, and report verification evidence."

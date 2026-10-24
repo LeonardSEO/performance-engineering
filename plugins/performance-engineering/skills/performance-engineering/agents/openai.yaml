@@ -1,0 +1,4 @@
+interface:
+  display_name: "Performance Engineering"
+  short_description: "Measure, route, improve, and verify performance"
+  default_prompt: "Use $performance-engineering to diagnose and improve the relevant behavior, preserve correctness, and report verification evidence."

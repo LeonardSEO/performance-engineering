@@ -1,0 +1,20 @@
+{
+  "name": "performance-engineering",
+  "interface": {
+    "displayName": "Performance Engineering"
+  },
+  "plugins": [
+    {
+      "name": "performance-engineering",
+      "source": {
+        "source": "local",
+        "path": "./plugins/performance-engineering"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_USE"
+      },
+      "category": "Developer Tools"
+    }
+  ]
+}

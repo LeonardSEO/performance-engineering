@@ -1,0 +1,4 @@
+interface:
+  display_name: "React Performance"
+  short_description: "Evidence-led React and Next.js optimization"
+  default_prompt: "Use $react-performance to diagnose and improve the relevant behavior, preserve correctness, and report verification evidence."

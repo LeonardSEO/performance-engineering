@@ -1,0 +1,4 @@
+interface:
+  display_name: "Doherty Threshold"
+  short_description: "Immediate feedback and honest async state"
+  default_prompt: "Use $doherty-threshold to diagnose and improve the relevant behavior, preserve correctness, and report verification evidence."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Asset Performance"
+  short_description: "Optimize critical web resources and delivery"
+  default_prompt: "Use $asset-performance to diagnose and improve the relevant behavior, preserve correctness, and report verification evidence."

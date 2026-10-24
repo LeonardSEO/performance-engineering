@@ -1,0 +1,17 @@
+{
+  "name": "performance-engineering",
+  "owner": {
+    "name": "LeonardSEO"
+  },
+  "metadata": {
+    "description": "Nine focused skills and advisory hooks for evidence-led web, fullstack, React and React Native performance engineering."
+  },
+  "plugins": [
+    {
+      "name": "performance-engineering",
+      "source": "./plugins/performance-engineering",
+      "version": "0.1.0",
+      "description": "Nine focused skills and advisory hooks for evidence-led web, fullstack, React and React Native performance engineering."
+    }
+  ]
+}
