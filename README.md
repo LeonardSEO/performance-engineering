@@ -1,19 +1,30 @@
-# Performance Engineering
+![Performance Engineering: Make fast feel instant. Nine skills, two agents, three advisory hooks and zero runtime dependencies.](assets/banner.svg)
 
 ```bash
 npx plugins add LeonardSEO/performance-engineering
 ```
 
-Nine focused skills and lightweight advisory hooks for faster, more responsive applications. Works with **Codex** and **Claude Code**, with a framework-independent web/fullstack core and separate React/Next.js and React Native guidance.
-
 [![Checks](https://github.com/LeonardSEO/performance-engineering/actions/workflows/checks.yml/badge.svg)](https://github.com/LeonardSEO/performance-engineering/actions/workflows/checks.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Release](https://img.shields.io/github/v/release/LeonardSEO/performance-engineering?color=c4fa75)](https://github.com/LeonardSEO/performance-engineering/releases/latest)
+[![MIT license](https://img.shields.io/badge/license-MIT-c4fa75)](LICENSE)
 
-Measure the actual bottleneck, change the relevant behavior, preserve correctness, and compare equivalent results. Immediate feedback matters; so do authorization, cache isolation, failure recovery, and honest progress.
+**Give your coding agent a performance workflow—from the first request to the final frame.**
+
+Performance Engineering brings nine focused skills to **Codex** and **Claude Code**. Find the bottleneck, choose the relevant guidance, preserve correctness, and verify the result. A framework-independent web/fullstack core covers data, backend work, page loading, assets, feedback and rendering. React/Next.js and React Native get dedicated specialists.
+
+[Install](#install) · [Explore the skills](#nine-skills-one-workflow) · [See the evidence](#measured-and-reviewable) · [Get the release](https://github.com/LeonardSEO/performance-engineering/releases/latest)
+
+## Build apps that respond
+
+- **Useful content sooner.** Keep the page shell available and reveal independent sections as they become ready.
+- **Feedback on every interaction.** Apply safe optimistic updates, recover from failures, and show truthful progress.
+- **Less avoidable work.** Diagnose request waterfalls, N+1 queries, heavy resources and main-thread stalls.
+- **Correctness throughout.** Preserve authorization, tenant boundaries, cache scope and write ordering.
+- **Guidance when it matters.** Lightweight hooks suggest relevant skills without launching an audit or blocking a tool.
 
 ## Install
 
-The universal command above detects supported agents. Install for one agent explicitly:
+The command at the top detects supported agents. Choose one explicitly:
 
 ### Codex
 
@@ -21,14 +32,7 @@ The universal command above detects supported agents. Install for one agent expl
 npx plugins add LeonardSEO/performance-engineering --target codex
 ```
 
-Native marketplace alternative:
-
-```bash
-codex plugin marketplace add LeonardSEO/performance-engineering
-codex plugin add performance-engineering@performance-engineering
-```
-
-Restart or open a new session after installation. Open `/hooks` to review and trust the plugin's hook definitions. Codex skips untrusted hooks; installing the plugin does not grant trust. Skills remain useful without hooks. No trust-bypass flag is required or recommended.
+Open a new session, then use `/hooks` to review and trust the plugin's three hook definitions. Codex requires this normal trust review before hooks execute. Skills are also available for direct use.
 
 ### Claude Code
 
@@ -36,82 +40,99 @@ Restart or open a new session after installation. Open `/hooks` to review and tr
 npx plugins add LeonardSEO/performance-engineering --target claude-code
 ```
 
-Native marketplace alternative:
+Open a new session or use Claude Code's plugin reload flow.
+
+<details>
+<summary>Native marketplace installation</summary>
+
+**Codex**
+
+```bash
+codex plugin marketplace add LeonardSEO/performance-engineering
+codex plugin add performance-engineering@performance-engineering
+```
+
+**Claude Code**
 
 ```bash
 claude plugin marketplace add LeonardSEO/performance-engineering
 claude plugin install performance-engineering@performance-engineering
 ```
 
-Open a new session or use the host's reload flow. During development, load only this plugin for a session with `claude --plugin-dir ./plugins/performance-engineering`.
+For local Claude development, use `claude --plugin-dir ./plugins/performance-engineering`.
 
-### Requirements
+</details>
 
-- Node.js **22 or later** on the agent's execution PATH for the hook scripts.
-- A current Codex or Claude Code version with plugin and command-hook support. See [validation](docs/validation.md) for the versions actually tested.
-- Existing application tooling for the measurement you want to perform. Browser profilers and native device tools are optional capabilities, not bundled services.
+**Requirements:** Node.js **22+** on the agent's execution PATH and a host version with plugin/command-hook support. Tested versions are listed in the [validation report](docs/validation.md).
 
-The native runtime intentionally has no root `plugin.json`: Codex 0.163.0 skips hooks for that portable format even when a compatibility overlay exists. `packaging/portable-plugin.json` is supplied separately for portable export; use the native package for the tested hook behavior.
+The installed plugin has **zero runtime package dependencies**. It needs no MCP server, API key or additional account. Use the browser, server and device tooling already available in your project; missing profilers lead to explicit verification steps and evidence limits.
 
-The installed plugin has **zero runtime package dependencies** and no MCP server, API key, account, production telemetry, or background network service. The development YAML parser is not required by installed hooks.
+## Nine skills. One workflow.
 
-## Skills
+![The performance router connects six framework-independent domains and two framework-specific specialists.](assets/skill-map.svg)
 
-| Skill | Owns |
+Start with `performance-engineering` for a broad problem. For a known bottleneck, go straight to its owner.
+
+| Skill | Ask it to… |
 |---|---|
-| **performance-engineering** | Triage, domain routing, baseline, comparable verification and evidence reporting |
-| **data-performance** | Request graphs, scoped concurrency, prefetch, client caches, stale responses and persistence ordering |
-| **backend-performance** | Endpoint latency, N+1, query plans, pagination, pools, server caches, CPU and memory |
-| **progressive-page-rendering** | Early authorized shell, independently ready sections, skeleton geometry and complete-record boundaries |
-| **asset-performance** | Images, fonts, CSS/JS bundles, critical resource loading, HTTP/CDN caching and third parties |
-| **doherty-threshold** | Immediate feedback, optimistic interaction, save/error recovery and honest progress |
-| **rendering-performance** | Main-thread work, DOM, layout/paint, virtualized lists, motion and reduced motion |
-| **react-performance** | React DOM/Next.js streaming, hydration, request scope, render profiling and version-aware APIs |
-| **react-native-performance** | Native startup, JS/UI frames, Hermes, memory, release/device evidence and bundling |
+| [performance-engineering](plugins/performance-engineering/skills/performance-engineering/SKILL.md) | Diagnose a slow journey, establish a baseline and organize comparable verification |
+| [data-performance](plugins/performance-engineering/skills/data-performance/SKILL.md) | Remove request waterfalls, scope caches, bound concurrency and handle stale results |
+| [backend-performance](plugins/performance-engineering/skills/backend-performance/SKILL.md) | Investigate API latency, N+1 queries, pools, query plans and server resources |
+| [progressive-page-rendering](plugins/performance-engineering/skills/progressive-page-rendering/SKILL.md) | Reveal a useful shell and ready regions while preserving complete-record boundaries |
+| [asset-performance](plugins/performance-engineering/skills/asset-performance/SKILL.md) | Improve critical image/font discovery, CSS/JS delivery, bundles and HTTP caching |
+| [doherty-threshold](plugins/performance-engineering/skills/doherty-threshold/SKILL.md) | Acknowledge input, reconcile optimistic changes and make waiting understandable |
+| [rendering-performance](plugins/performance-engineering/skills/rendering-performance/SKILL.md) | Profile main-thread work, layout, paint, lists and interruptible motion |
+| [react-performance](plugins/performance-engineering/skills/react-performance/SKILL.md) | Apply version-aware React/Next.js streaming, hydration and render guidance |
+| [react-native-performance](plugins/performance-engineering/skills/react-native-performance/SKILL.md) | Diagnose native startup, JS/UI frames, lists, memory and Hermes behavior |
 
-Start with the router for a broad problem, or invoke the relevant skill directly. Detailed references load only when needed; the plugin does not inject nine complete manuals into every turn.
+Each domain owns its rules. Detailed references load when needed, and shared measurement guidance keeps the evidence consistent.
 
-### Examples
+## Try it on a real problem
 
 **Codex**
 
 ```text
-Use $performance-engineering:performance-engineering to investigate why this dashboard is slow.
-Establish what can be measured and preserve tenant isolation.
+Use $performance-engineering:performance-engineering to investigate this slow dashboard.
+Find the dominant wait, preserve tenant isolation, and compare equivalent measurements.
 ```
 
 **Claude Code**
 
 ```text
 /performance-engineering:performance-engineering
-Investigate why this dashboard is slow and compare equivalent measurements.
+Investigate this slow dashboard. Find the dominant wait, preserve tenant isolation,
+and compare equivalent measurements.
 ```
 
-Other useful requests:
+More starting points:
 
-- “Keep the page header and useful sections available while optional data loads.”
-- “Make this toggle respond immediately, but preserve the final saved value if requests finish out of order.”
-- “Find the actual LCP bottleneck; do not preload every resource.”
+- “Keep useful sections available while optional reports load.”
+- “Make this toggle respond immediately and preserve the latest saved value when requests finish out of order.”
+- “Find the actual LCP bottleneck and verify resource priorities.”
 - “Profile this Next.js interaction before adding memoization.”
-- “Investigate React Native startup and dropped frames using release-device evidence.”
+- “Investigate React Native startup using release-device evidence.”
 
-## How the hooks help
+## Make every interaction count
 
-The plugin uses a shared deterministic Node engine with separate host configurations:
+![Five Doherty rules: acknowledge taps, show safe changes immediately, start useful work early, reveal stable skeletons and show truthful progress.](assets/interaction-playbook.svg)
 
-| Event | Behavior |
+The commonly cited **400 ms** Doherty figure is a heuristic. The workflow distinguishes immediate acknowledgment, useful results, persisted completion and motion duration. Recovery, keyboard access and reduced motion belong to the same interaction design.
+
+## Hooks that stay in scope
+
+| Event | What you get |
 |---|---|
-| `SessionStart` | A short route guide plus root-package stack detection |
-| `UserPromptSubmit` | Relevant English/Dutch performance intent routes to at most two skills |
-| `PostToolUse` | Relevant structured file changes can introduce a newly relevant domain |
+| `SessionStart` | A short route guide and root-package stack detection |
+| `UserPromptSubmit` | English/Dutch performance intent routes to at most two relevant skills |
+| `PostToolUse` | Supported structured file changes can introduce a newly relevant domain |
 
-Hooks only advise. They do **not** block tools, continue a finished turn, run audits, execute project code, install packages, or perform network requests. They do not guarantee that an agent follows every suggestion.
+The shared deterministic Node engine reads bounded project metadata and explicitly affected files. The nearest package determines the relevant stack; `.tsx` alone does not establish React Native. Unknown shell effects remain unknown.
 
-Detection uses the nearest package manifest and bounded reads of explicitly affected files. A `.tsx` suffix alone is not a React Native signal. Unknown shell effects are not guessed. Instructions are deduplicated per host/session/project and restored after compaction.
+Context is capped at **1,000 characters** at startup and **3,000 characters** per targeted suggestion. Domain suggestions are deduplicated per session and restored after compaction. Each hook has a **two-second timeout** and fails open.
 
-Startup context is capped at 1,000 characters; targeted context at 3,000. Each hook has a two-second timeout and fails open. [Hook behavior and privacy](docs/hooks.md) describes coverage and limits.
+Hooks do not run benchmarks, install packages, make network requests, execute project code or write into your project. Their local state contains bounded deduplication metadata; prompts and source code are not retained. See [execution, privacy and compatibility](docs/hooks.md).
 
-Disable the advisory hook output while retaining skills:
+To retain skills while silencing advisory output:
 
 ```bash
 PERFORMANCE_ENGINEERING_HOOKS=off codex
@@ -119,19 +140,25 @@ PERFORMANCE_ENGINEERING_HOOKS=off codex
 PERFORMANCE_ENGINEERING_HOOKS=off claude
 ```
 
-On PowerShell, set `$env:PERFORMANCE_ENGINEERING_HOOKS = "off"` before launching the agent. You can also use the host's hook/plugin controls.
+PowerShell: set `$env:PERFORMANCE_ENGINEERING_HOOKS = "off"` before launch. Host plugin controls are also available.
 
-## Actual speed and perceived responsiveness
+## Measured and reviewable
 
-The commonly cited **400 ms** Doherty figure is a heuristic, not a universal cutoff or API promise. The plugin separates acknowledgment, useful results, persisted completion, and motion duration.
+| Evidence | Observed result |
+|---|---|
+| Hook-process benchmark | **74.99 ms p95** across **45** local macOS samples, including fresh Node startup |
+| Deterministic tests | **15 tests**, passing on **Linux, macOS and Windows** with Node 22 |
+| Installation | Universal, explicit Codex and explicit Claude routes verified against actual installed files |
+| Native hosts | Both agents receive guidance after a real scratch-file write; Codex uses normal reviewed hook trust |
+| Agent behavior | **24 final paired static reviews** covering six scenarios in both agents |
 
-It reduces real work where profiles justify it and makes unavoidable waiting understandable. It does not hide ready results behind a spinner floor, invent progress, suppress errors, or declare a payment successful before confirmation.
+The measured hook-process p95 was **25% below our 100 ms target**. This measures hook startup and execution on one machine. Website and application speed gains require comparable measurements of the application itself.
 
-Static findings are hypotheses. Lab measurements are not field p75. Native device performance cannot be established from source review or a browser score. See the [measurement contract](plugins/performance-engineering/skills/performance-engineering/references/measurement.md).
+Read the [full validation report](docs/validation.md) and [sanitized agent responses](validation/agent-results.json) for methods, earlier diagnostic runs and residual model-output warnings. Baseline agents already handle many issues well. These results support the stated checks; they do not establish a universal percentage improvement or guarantee instruction following.
 
-## Update, disable and remove
+## Update or remove
 
-For the universal installer, rerun the corresponding install command to refresh the checkout/install. Native marketplace installs use the host's own lifecycle:
+Rerun the matching `npx plugins add` command to refresh a universal installation. Native installations use the host lifecycle:
 
 ```bash
 # Codex
@@ -145,9 +172,11 @@ claude plugin disable performance-engineering@performance-engineering
 claude plugin uninstall performance-engineering@performance-engineering
 ```
 
-Codex also exposes plugin enable/disable controls in the app. A changed hook definition may require a new trust review. Universal-installer and native-marketplace registrations can differ; inspect the host's plugin list before removing a registration created by another installer.
+Codex also provides app controls for enabling/disabling plugins. Changed hook definitions can require renewed trust review. Inspect the host's plugin list before removing a registration made by another installer.
 
-## Development and validation
+**Compatibility:** the tested Codex 0.163.0 runtime uses `.codex-plugin/plugin.json`; Claude uses `.claude-plugin/plugin.json`. Codex skips hooks for the portable root-manifest format on that version. The generated portable export manifest is therefore separate at `packaging/portable-plugin.json`. [Details](docs/hooks.md#tested-codex-format-limitation).
+
+## Contribute a measured improvement
 
 ```bash
 npm ci
@@ -156,9 +185,11 @@ npm run check
 npm run bench:hooks
 ```
 
-`plugin.meta.json` is the single source for identity/version metadata. Generation produces native compatibility manifests, a separate portable export manifest, host hook adapters, and both marketplace catalogs. The CI matrix runs Node 22 on Linux, macOS and Windows.
+Identity and version metadata come from `plugin.meta.json`. Generation synchronizes native manifests, the portable export manifest, hook configurations and both marketplace catalogs. Explicit authenticated evaluations and native/installer smoke tests are documented in [validation](docs/validation.md) and the [evaluation methodology](evals/README.md).
 
-The [validation report](docs/validation.md) distinguishes deterministic tests, native loader/installation checks, agent behavior evaluations and unverified conditions. Agent evals use existing authenticated CLIs, run only when explicitly requested with `npm run eval:agents`, and are not part of normal hooks or CI. See [evaluation methodology](evals/README.md). Native CLI and isolated installer smoke-test commands are documented in the validation report.
+Bring a concrete journey, a reproducible fixture or a measured before/after result. Keep scope proportional, preserve the existing stack, and explain what the evidence establishes. The [SVG artwork](assets/README.md) is editable and available for sharing under the repository's MIT license.
+
+If the workflow helps you ship a useful improvement, **star the repository and share the measured result**.
 
 ## License and acknowledgments
 
