@@ -25,7 +25,7 @@ test('complete evaluation payloads route by the actual opening request',t=>{
     const prompt=c.prompt+'\n\nThe complete fixture source follows.\n'+JSON.stringify(c.files)+'\n\nFor the spelling-only task follow its output requirement.';
     const out=context(f.run('UserPromptSubmit',{session_id:c.id,prompt}));
     if(!c.domains.length)assert.equal(out,'');
-    else assert.ok(c.domains.some(domain=>out.includes('/'+domain+'/')),c.id);
+    else assert.ok(c.domains.some(domain=>out.includes(path.sep+domain+path.sep)),c.id);
   }
 });
 for (const host of ['codex','claude']) {
